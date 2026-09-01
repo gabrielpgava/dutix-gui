@@ -117,7 +117,7 @@ export function App() {
   }
 
   return (
-    <div className="flex h-screen w-screen overflow-hidden bg-slate-950 text-slate-100 select-none">
+    <div className="flex h-screen w-screen overflow-hidden bg-[#f8fafc] text-slate-900 select-none">
       {/* Sidebar */}
       <Sidebar
         currentTab={currentTab}
@@ -129,7 +129,7 @@ export function App() {
       />
 
       {/* Main View Area */}
-      <div className="flex-1 flex flex-col min-w-0 overflow-hidden bg-gradient-to-b from-slate-950 via-slate-950 to-slate-900">
+      <div className="flex-1 flex flex-col min-w-0 overflow-hidden bg-gradient-to-b from-[#f8fafc] via-[#f1f5f9] to-[#e8eef6]">
         <Header
           title={getTabTitle(currentTab)}
           subtitle={

@@ -170,8 +170,8 @@ export const PresetsView: React.FC<PresetsViewProps> = ({
       {/* Header */}
       <div className="flex flex-col sm:flex-row gap-4 items-start sm:items-center justify-between">
         <div>
-          <h2 className="text-xl font-bold text-white tracking-tight">Presets Rápidos & Dotfiles</h2>
-          <p className="text-xs text-slate-400">
+          <h2 className="text-xl font-bold text-slate-900 tracking-tight">Presets Rápidos & Dotfiles</h2>
+          <p className="text-xs text-slate-500 mt-0.5 font-medium">
             Configure seu novo Mac com 1 clique usando perfis prontos ou exporte suas preferências em JSON.
           </p>
         </div>
@@ -179,15 +179,15 @@ export const PresetsView: React.FC<PresetsViewProps> = ({
         <div className="flex items-center gap-3">
           <button
             onClick={() => setIsImportModalOpen(true)}
-            className="flex items-center gap-1.5 px-3.5 py-2 rounded-xl bg-slate-800 hover:bg-slate-700 text-slate-200 border border-slate-700 text-xs font-semibold transition-colors cursor-pointer"
+            className="flex items-center gap-1.5 px-3.5 py-2 rounded-xl bg-white hover:bg-slate-50 text-slate-700 border border-slate-200 text-xs font-bold transition-colors cursor-pointer active:scale-[0.98] shadow-2xs"
           >
-            <Upload className="w-3.5 h-3.5 text-indigo-400" />
+            <Upload className="w-3.5 h-3.5 text-indigo-600" />
             <span>Importar JSON</span>
           </button>
 
           <button
             onClick={() => setIsNewModalOpen(true)}
-            className="flex items-center gap-1.5 px-4 py-2 rounded-xl bg-indigo-600 hover:bg-indigo-500 text-white text-xs font-semibold transition-all shadow-lg shadow-indigo-600/30 cursor-pointer"
+            className="flex items-center gap-1.5 px-4 py-2 rounded-xl bg-indigo-600 hover:bg-indigo-700 text-white text-xs font-bold transition-all shadow-md shadow-indigo-600/20 cursor-pointer active:scale-[0.98]"
           >
             <Plus className="w-3.5 h-3.5" />
             <span>Criar Preset</span>
@@ -198,21 +198,21 @@ export const PresetsView: React.FC<PresetsViewProps> = ({
       {/* Alert Banner */}
       {alert && (
         <div
-          className={`p-4 rounded-2xl border text-xs flex items-center justify-between ${
+          className={`p-4 rounded-2xl border text-xs flex items-center justify-between font-medium ${
             alert.type === 'success'
-              ? 'bg-emerald-500/10 border-emerald-500/30 text-emerald-300'
-              : 'bg-rose-500/10 border-rose-500/30 text-rose-300'
+              ? 'bg-emerald-50 border-emerald-200 text-emerald-800'
+              : 'bg-rose-50 border-rose-200 text-rose-800'
           }`}
         >
           <div className="flex items-center gap-2">
             {alert.type === 'success' ? (
-              <CheckCircle2 className="w-4 h-4 shrink-0" />
+              <CheckCircle2 className="w-4 h-4 shrink-0 text-emerald-600" />
             ) : (
-              <AlertCircle className="w-4 h-4 shrink-0" />
+              <AlertCircle className="w-4 h-4 shrink-0 text-rose-600" />
             )}
             <span>{alert.message}</span>
           </div>
-          <button onClick={() => setAlert(null)} className="text-slate-400 hover:text-slate-200">
+          <button onClick={() => setAlert(null)} className="text-slate-500 hover:text-slate-800 cursor-pointer">
             <X className="w-4 h-4" />
           </button>
         </div>
@@ -227,35 +227,35 @@ export const PresetsView: React.FC<PresetsViewProps> = ({
           return (
             <div
               key={p.id}
-              className="p-6 rounded-3xl bg-slate-900/60 border border-slate-800/80 hover:border-slate-700 transition-all flex flex-col justify-between space-y-4 backdrop-blur-sm relative"
+              className="p-6 rounded-3xl bg-white border border-slate-200/90 hover:border-indigo-400 hover:shadow-md transition-all flex flex-col justify-between space-y-4 relative shadow-xs"
             >
               {/* Header */}
               <div className="flex items-start justify-between">
                 <div className="flex items-center gap-3">
-                  <div className="w-12 h-12 rounded-2xl bg-indigo-500/10 border border-indigo-500/30 flex items-center justify-center text-indigo-400">
+                  <div className="w-12 h-12 rounded-2xl bg-indigo-50 border border-indigo-200 flex items-center justify-center text-indigo-700 shadow-2xs">
                     <Icon className="w-6 h-6" />
                   </div>
                   <div>
                     <div className="flex items-center gap-2">
-                      <h3 className="text-base font-bold text-white">{p.name}</h3>
+                      <h3 className="text-base font-bold text-slate-900">{p.name}</h3>
                       {p.is_builtin ? (
-                        <span className="px-2 py-0.5 rounded-full text-[9px] font-semibold uppercase bg-indigo-500/10 text-indigo-400 border border-indigo-500/20">
+                        <span className="px-2 py-0.5 rounded-full text-[9px] font-bold uppercase bg-indigo-50 text-indigo-700 border border-indigo-200">
                           Oficial
                         </span>
                       ) : (
-                        <span className="px-2 py-0.5 rounded-full text-[9px] font-semibold uppercase bg-purple-500/10 text-purple-400 border border-purple-500/20">
+                        <span className="px-2 py-0.5 rounded-full text-[9px] font-bold uppercase bg-purple-50 text-purple-700 border border-purple-200">
                           Custom
                         </span>
                       )}
                     </div>
-                    <span className="text-[11px] text-slate-500">{p.category}</span>
+                    <span className="text-[11px] text-slate-500 font-medium">{p.category}</span>
                   </div>
                 </div>
 
                 <div className="flex items-center gap-1">
                   <button
                     onClick={() => handleExport(p)}
-                    className="p-1.5 rounded-lg text-slate-400 hover:text-slate-200 hover:bg-slate-800 transition-colors cursor-pointer"
+                    className="p-1.5 rounded-lg text-slate-400 hover:text-slate-700 hover:bg-slate-100 transition-colors cursor-pointer"
                     title="Exportar JSON"
                   >
                     <Download className="w-4 h-4" />
@@ -263,7 +263,7 @@ export const PresetsView: React.FC<PresetsViewProps> = ({
                   {!p.is_builtin && (
                     <button
                       onClick={() => handleDelete(p.id)}
-                      className="p-1.5 rounded-lg text-slate-400 hover:text-rose-400 hover:bg-rose-950/40 transition-colors cursor-pointer"
+                      className="p-1.5 rounded-lg text-slate-400 hover:text-rose-600 hover:bg-rose-50 transition-colors cursor-pointer"
                       title="Excluir preset"
                     >
                       <Trash2 className="w-4 h-4" />
@@ -273,18 +273,18 @@ export const PresetsView: React.FC<PresetsViewProps> = ({
               </div>
 
               {/* Description */}
-              <p className="text-xs text-slate-400 leading-relaxed">{p.description}</p>
+              <p className="text-xs text-slate-600 leading-relaxed font-normal">{p.description}</p>
 
               {/* Mappings Summary */}
-              <div className="p-3.5 rounded-2xl bg-slate-950/60 border border-slate-800 space-y-2">
-                <span className="text-[10px] text-slate-500 uppercase tracking-wider block font-semibold">
+              <div className="p-3.5 rounded-2xl bg-slate-50 border border-slate-200 space-y-2 shadow-2xs">
+                <span className="text-[10px] text-slate-500 uppercase tracking-wider block font-bold">
                   Mapeamentos Incluídos ({p.mappings?.length || 0})
                 </span>
                 <div className="space-y-1.5">
                   {p.mappings?.map((m, idx) => (
                     <div key={idx} className="flex items-center justify-between text-xs font-mono">
-                      <span className="text-indigo-300 font-semibold truncate max-w-xs">{m.app_name}</span>
-                      <span className="text-[10px] text-slate-400">
+                      <span className="text-indigo-700 font-bold truncate max-w-xs">{m.app_name}</span>
+                      <span className="text-[10px] text-slate-500 font-medium">
                         {m.extensions?.length ? `${m.extensions.length} extensões` : ''}
                         {m.schemes?.length ? ` ${m.schemes.join(', ')}` : ''}
                       </span>
@@ -297,7 +297,7 @@ export const PresetsView: React.FC<PresetsViewProps> = ({
               <button
                 onClick={() => handleApply(p)}
                 disabled={isApplying}
-                className="w-full flex items-center justify-center gap-2 py-2.5 rounded-xl bg-indigo-600 hover:bg-indigo-500 text-white font-semibold text-xs transition-all shadow-lg shadow-indigo-600/20 disabled:opacity-50 cursor-pointer"
+                className="w-full flex items-center justify-center gap-2 py-2.5 rounded-xl bg-indigo-600 hover:bg-indigo-700 text-white font-bold text-xs transition-all shadow-md shadow-indigo-600/20 disabled:opacity-50 cursor-pointer active:scale-[0.98]"
               >
                 {isApplying ? (
                   <>
@@ -318,11 +318,11 @@ export const PresetsView: React.FC<PresetsViewProps> = ({
 
       {/* Export Modal */}
       {exportModalPreset && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/75 backdrop-blur-sm p-4">
-          <div className="bg-slate-900 border border-slate-800 rounded-3xl w-full max-w-lg shadow-2xl p-6 space-y-4">
-            <div className="flex items-center justify-between border-b border-slate-800 pb-3">
-              <h3 className="text-base font-bold text-white">Exportar Preset: {exportModalPreset.name}</h3>
-              <button onClick={() => setExportModalPreset(null)} className="text-slate-400 hover:text-slate-200">
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 backdrop-blur-md p-4">
+          <div className="bg-white border border-slate-200 rounded-3xl w-full max-w-lg shadow-2xl p-6 space-y-4">
+            <div className="flex items-center justify-between border-b border-slate-100 pb-3">
+              <h3 className="text-base font-bold text-slate-900">Exportar Preset: {exportModalPreset.name}</h3>
+              <button onClick={() => setExportModalPreset(null)} className="text-slate-400 hover:text-slate-700">
                 <X className="w-5 h-5" />
               </button>
             </div>
@@ -330,7 +330,7 @@ export const PresetsView: React.FC<PresetsViewProps> = ({
               readOnly
               value={exportedJson}
               rows={10}
-              className="w-full p-3 bg-slate-950 border border-slate-800 rounded-xl font-mono text-xs text-indigo-300 focus:outline-none select-all"
+              className="w-full p-3 bg-slate-50 border border-slate-200 rounded-xl font-mono text-xs text-indigo-700 focus:outline-none select-all"
             />
             <div className="flex justify-end gap-2">
               <button
@@ -339,7 +339,7 @@ export const PresetsView: React.FC<PresetsViewProps> = ({
                   setAlert({ type: 'success', message: 'JSON copiado para a área de transferência!' })
                   setExportModalPreset(null)
                 }}
-                className="px-4 py-2 bg-indigo-600 hover:bg-indigo-500 text-white text-xs font-semibold rounded-xl cursor-pointer"
+                className="px-4 py-2 bg-indigo-600 hover:bg-indigo-700 text-white text-xs font-bold rounded-xl cursor-pointer active:scale-[0.98] shadow-2xs"
               >
                 Copiar JSON
               </button>
@@ -350,11 +350,11 @@ export const PresetsView: React.FC<PresetsViewProps> = ({
 
       {/* Import Modal */}
       {isImportModalOpen && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/75 backdrop-blur-sm p-4">
-          <div className="bg-slate-900 border border-slate-800 rounded-3xl w-full max-w-lg shadow-2xl p-6 space-y-4">
-            <div className="flex items-center justify-between border-b border-slate-800 pb-3">
-              <h3 className="text-base font-bold text-white">Importar Preset (.json)</h3>
-              <button onClick={() => setIsImportModalOpen(false)} className="text-slate-400 hover:text-slate-200">
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 backdrop-blur-md p-4">
+          <div className="bg-white border border-slate-200 rounded-3xl w-full max-w-lg shadow-2xl p-6 space-y-4">
+            <div className="flex items-center justify-between border-b border-slate-100 pb-3">
+              <h3 className="text-base font-bold text-slate-900">Importar Preset (.json)</h3>
+              <button onClick={() => setIsImportModalOpen(false)} className="text-slate-400 hover:text-slate-700">
                 <X className="w-5 h-5" />
               </button>
             </div>
@@ -363,18 +363,18 @@ export const PresetsView: React.FC<PresetsViewProps> = ({
               value={importJsonText}
               onChange={(e) => setImportJsonText(e.target.value)}
               rows={10}
-              className="w-full p-3 bg-slate-950 border border-slate-800 rounded-xl font-mono text-xs text-slate-100 focus:outline-none focus:border-indigo-500"
+              className="w-full p-3 bg-slate-50 border border-slate-200 rounded-xl font-mono text-xs text-slate-800 focus:outline-none focus:border-indigo-500 font-medium"
             />
             <div className="flex justify-end gap-2">
               <button
                 onClick={() => setIsImportModalOpen(false)}
-                className="px-4 py-2 bg-slate-800 hover:bg-slate-700 text-slate-300 text-xs font-semibold rounded-xl cursor-pointer"
+                className="px-4 py-2 bg-slate-100 hover:bg-slate-200 text-slate-700 text-xs font-semibold rounded-xl cursor-pointer border border-slate-200 shadow-2xs"
               >
                 Cancelar
               </button>
               <button
                 onClick={handleImport}
-                className="px-4 py-2 bg-indigo-600 hover:bg-indigo-500 text-white text-xs font-semibold rounded-xl cursor-pointer"
+                className="px-4 py-2 bg-indigo-600 hover:bg-indigo-700 text-white text-xs font-bold rounded-xl cursor-pointer active:scale-[0.98] shadow-2xs"
               >
                 Importar
               </button>
@@ -385,56 +385,56 @@ export const PresetsView: React.FC<PresetsViewProps> = ({
 
       {/* Create New Preset Modal */}
       {isNewModalOpen && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/75 backdrop-blur-sm p-4">
-          <div className="bg-slate-900 border border-slate-800 rounded-3xl w-full max-w-lg shadow-2xl p-6 space-y-4">
-            <div className="flex items-center justify-between border-b border-slate-800 pb-3">
-              <h3 className="text-base font-bold text-white">Criar Novo Preset</h3>
-              <button onClick={() => setIsNewModalOpen(false)} className="text-slate-400 hover:text-slate-200">
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 backdrop-blur-md p-4">
+          <div className="bg-white border border-slate-200 rounded-3xl w-full max-w-lg shadow-2xl p-6 space-y-4">
+            <div className="flex items-center justify-between border-b border-slate-100 pb-3">
+              <h3 className="text-base font-bold text-slate-900">Criar Novo Preset</h3>
+              <button onClick={() => setIsNewModalOpen(false)} className="text-slate-400 hover:text-slate-700">
                 <X className="w-5 h-5" />
               </button>
             </div>
             <div className="space-y-3 text-xs">
               <div>
-                <label className="block text-slate-300 font-semibold mb-1">Nome do Preset</label>
+                <label className="block text-slate-700 font-bold mb-1">Nome do Preset</label>
                 <input
                   type="text"
                   placeholder="Ex: Meu Setup Dev 2026"
                   value={newPresetName}
                   onChange={(e) => setNewPresetName(e.target.value)}
-                  className="w-full px-3 py-2 bg-slate-950 border border-slate-800 rounded-xl text-slate-100 focus:outline-none focus:border-indigo-500"
+                  className="w-full px-3 py-2 bg-slate-50 border border-slate-200 rounded-xl text-slate-800 focus:outline-none focus:border-indigo-500 font-medium"
                 />
               </div>
 
               <div>
-                <label className="block text-slate-300 font-semibold mb-1">Descrição</label>
+                <label className="block text-slate-700 font-bold mb-1">Descrição</label>
                 <input
                   type="text"
                   placeholder="Ex: Associações para projetos React e Rust"
                   value={newPresetDesc}
                   onChange={(e) => setNewPresetDesc(e.target.value)}
-                  className="w-full px-3 py-2 bg-slate-950 border border-slate-800 rounded-xl text-slate-100 focus:outline-none focus:border-indigo-500"
+                  className="w-full px-3 py-2 bg-slate-50 border border-slate-200 rounded-xl text-slate-800 focus:outline-none focus:border-indigo-500 font-medium"
                 />
               </div>
 
               <div>
-                <label className="block text-slate-300 font-semibold mb-1">Aplicativo Padrão</label>
+                <label className="block text-slate-700 font-bold mb-1">Aplicativo Padrão</label>
                 <input
                   type="text"
                   placeholder="Ex: Visual Studio Code"
                   value={newPresetAppName}
                   onChange={(e) => setNewPresetAppName(e.target.value)}
-                  className="w-full px-3 py-2 bg-slate-950 border border-slate-800 rounded-xl text-slate-100 focus:outline-none focus:border-indigo-500"
+                  className="w-full px-3 py-2 bg-slate-50 border border-slate-200 rounded-xl text-slate-800 focus:outline-none focus:border-indigo-500 font-medium"
                 />
               </div>
 
               <div>
-                <label className="block text-slate-300 font-semibold mb-1">Extensões (separadas por vírgula)</label>
+                <label className="block text-slate-700 font-bold mb-1">Extensões (separadas por vírgula)</label>
                 <input
                   type="text"
                   placeholder="Ex: ts, tsx, js, json, rs, toml"
                   value={newPresetExts}
                   onChange={(e) => setNewPresetExts(e.target.value)}
-                  className="w-full px-3 py-2 bg-slate-950 border border-slate-800 rounded-xl text-slate-100 font-mono focus:outline-none focus:border-indigo-500"
+                  className="w-full px-3 py-2 bg-slate-50 border border-slate-200 rounded-xl text-slate-800 font-mono focus:outline-none focus:border-indigo-500 font-medium"
                 />
               </div>
             </div>
@@ -442,13 +442,13 @@ export const PresetsView: React.FC<PresetsViewProps> = ({
             <div className="flex justify-end gap-2 pt-2">
               <button
                 onClick={() => setIsNewModalOpen(false)}
-                className="px-4 py-2 bg-slate-800 hover:bg-slate-700 text-slate-300 text-xs font-semibold rounded-xl cursor-pointer"
+                className="px-4 py-2 bg-slate-100 hover:bg-slate-200 text-slate-700 text-xs font-semibold rounded-xl cursor-pointer border border-slate-200 shadow-2xs"
               >
                 Cancelar
               </button>
               <button
                 onClick={handleSaveNew}
-                className="px-4 py-2 bg-indigo-600 hover:bg-indigo-500 text-white text-xs font-semibold rounded-xl cursor-pointer"
+                className="px-4 py-2 bg-indigo-600 hover:bg-indigo-700 text-white text-xs font-bold rounded-xl cursor-pointer active:scale-[0.98] shadow-2xs"
               >
                 Salvar Preset
               </button>
