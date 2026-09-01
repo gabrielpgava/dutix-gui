@@ -145,7 +145,7 @@ export const AppDetailsModal: React.FC<AppDetailsModalProps> = ({
               <div className="grid grid-cols-2 gap-3">
                 <button
                   onClick={() => {
-                    onSetAsDefault(appName, allExtensions, allUTIs)
+                    onSetAsDefault(appName, allExtensions, [])
                     onClose()
                   }}
                   disabled={allExtensions.length === 0}

@@ -96,9 +96,11 @@ export const SetHandlersView: React.FC<SetHandlersViewProps> = ({
 
   useEffect(() => {
     if (initialApp) setSelectedApp(initialApp)
-    if (initialExtensions.length > 0) setSelectedExtensions(initialExtensions)
-    if (initialUTIs.length > 0) setSelectedUTIs(initialUTIs)
+    setSelectedExtensions(initialExtensions || [])
+    setSelectedUTIs(initialUTIs || [])
   }, [initialApp, initialExtensions, initialUTIs])
+
+  const hasSelectedTargets = selectedExtensions.length > 0 || selectedSchemes.length > 0 || selectedUTIs.length > 0
 
   // Keyboard shortcut listener for Cmd + Enter to simulate
   useEffect(() => {
@@ -158,8 +160,8 @@ export const SetHandlersView: React.FC<SetHandlersViewProps> = ({
       setAlert({ type: 'error', message: 'Selecione um aplicativo de destino primeiro.' })
       return
     }
-    if (selectedExtensions.length === 0 && selectedSchemes.length === 0 && selectedUTIs.length === 0) {
-      setAlert({ type: 'error', message: 'Selecione ao menos uma extensão, UTI ou esquema URL.' })
+    if (!hasSelectedTargets) {
+      setAlert({ type: 'error', message: 'Selecione ao menos uma extensão ou esquema URL.' })
       return
     }
 
@@ -178,7 +180,7 @@ export const SetHandlersView: React.FC<SetHandlersViewProps> = ({
   }
 
   const handleApplyChanges = async () => {
-    if (!selectedApp) return
+    if (!selectedApp || !hasSelectedTargets) return
     setApplying(true)
     setAlert(null)
 
@@ -281,6 +283,7 @@ export const SetHandlersView: React.FC<SetHandlersViewProps> = ({
                     key={a.bundle_id || a.name}
                     onClick={() => {
                       setSelectedApp(a.name)
+                      setSelectedUTIs([])
                       setIsAppDropdownOpen(false)
                     }}
                     className="w-full text-left p-2 rounded-xl hover:bg-slate-100 flex items-center gap-3 text-xs text-slate-800 transition-colors cursor-pointer active:scale-[0.99]"
@@ -419,14 +422,27 @@ export const SetHandlersView: React.FC<SetHandlersViewProps> = ({
       {/* Action Footer */}
       <div className="flex flex-col sm:flex-row gap-3 items-center justify-between p-6 rounded-3xl bg-white border border-slate-200 shadow-sm">
         <div className="text-xs text-slate-600 font-medium">
-          Pronto para associar <strong className="text-slate-900 font-bold">{selectedExtensions.length} extensões</strong> ao app{' '}
-          <strong className="text-indigo-600 font-bold">{selectedApp || '(Nenhum app selecionado)'}</strong>
+          {hasSelectedTargets ? (
+            <>
+              Pronto para associar{' '}
+              <strong className="text-slate-900 font-bold">
+                {[
+                  selectedExtensions.length > 0 ? `${selectedExtensions.length} extensões` : '',
+                  selectedSchemes.length > 0 ? `${selectedSchemes.length} protocolos` : '',
+                  selectedUTIs.length > 0 ? `${selectedUTIs.length} UTIs` : ''
+                ].filter(Boolean).join(', ')}
+              </strong>{' '}
+              ao app <strong className="text-indigo-600 font-bold">{selectedApp || '(Nenhum app selecionado)'}</strong>
+            </>
+          ) : (
+            <span className="text-amber-600 font-semibold">Nenhuma extensão ou protocolo selecionado</span>
+          )}
         </div>
 
         <div className="flex items-center gap-3 w-full sm:w-auto justify-end">
           <button
             onClick={handleSimulate}
-            disabled={loadingDryRun || !selectedApp}
+            disabled={loadingDryRun || !selectedApp || !hasSelectedTargets}
             className="flex items-center gap-2 px-5 py-2.5 rounded-xl bg-slate-100 hover:bg-slate-200 text-slate-700 border border-slate-200 text-xs font-bold transition-all disabled:opacity-50 cursor-pointer active:scale-[0.98] shadow-2xs"
             title="Simular alterações (Atalho: ⌘ + Enter)"
           >
@@ -440,7 +456,7 @@ export const SetHandlersView: React.FC<SetHandlersViewProps> = ({
 
           <button
             onClick={handleApplyChanges}
-            disabled={applying || !selectedApp}
+            disabled={applying || !selectedApp || !hasSelectedTargets}
             className="flex items-center gap-2 px-6 py-2.5 rounded-xl bg-indigo-600 hover:bg-indigo-700 text-white text-xs font-bold transition-all shadow-md shadow-indigo-600/20 disabled:opacity-50 cursor-pointer active:scale-[0.98]"
           >
             {applying ? (
