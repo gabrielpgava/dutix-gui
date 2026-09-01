@@ -28,7 +28,7 @@ jobs:
       - name: Set up Go
         uses: actions/setup-go@v5
         with:
-          go-version: '1.23'
+          go-version: 'stable'
           cache: true
 
       - name: Set up Node.js
@@ -39,7 +39,9 @@ jobs:
           cache-dependency-path: frontend/package-lock.json
 
       - name: Install Wails CLI
-        run: go install github.com/wailsapp/wails/v2/cmd/wails@latest
+        run: |
+          go install github.com/wailsapp/wails/v2/cmd/wails@latest
+          echo "$(go env GOPATH)/bin" >> $GITHUB_PATH
 
       - name: Install Dependencies
         run: make deps
@@ -60,7 +62,6 @@ jobs:
 
       - name: Build Universal macOS .app Bundle
         run: |
-          export PATH=$PATH:$(go env GOPATH)/bin
           VERSION="${{ steps.get_version.outputs.VERSION }}"
           wails build -platform darwin/universal -clean -ldflags "-X dutix-gui/pkg/version.Version=${VERSION} -X dutix-gui/pkg/version.GitCommit=${{ github.sha }} -X dutix-gui/pkg/version.BuildDate=$(date -u +%Y-%m-%dT%H:%M:%SZ)"
 
@@ -88,9 +89,34 @@ jobs:
           name: Dutix GUI ${{ steps.get_version.outputs.VERSION }}
           draft: false
           prerelease: false
-          generate_release_notes: true
+          generate_release_notes: false
+          body: |
+            ## ⚡️ Dutix GUI ${{ steps.get_version.outputs.VERSION }} — Native macOS File Association Manager
+
+            Interface gráfica nativa para macOS desenvolvida em **Wails v2** (Go + React 18 + TailwindCSS v4) para gerenciar associações padrão de arquivos, esquemas URL e identificadores de tipo uniforme (UTIs) via utilitário CLI [`dutix`](https://github.com/jackchuka/dutix).
+
+            ---
+
+            ### 📦 Download & Instalação
+            1. Baixe o pacote Universal: [`Dutix-GUI-${{ steps.get_version.outputs.VERSION }}-macOS-Universal.zip`](https://github.com/${{ github.repository }}/releases/download/${{ steps.get_version.outputs.VERSION }}/Dutix-GUI-${{ steps.get_version.outputs.VERSION }}-macOS-Universal.zip)
+            2. Descompacte o arquivo e arraste o **Dutix GUI.app** para a pasta `/Applications` (ou `~/Applications`).
+            3. *Nota para macOS*: Como o aplicativo é distribuído como código aberto, se o macOS exibir aviso de segurança na primeira execução, clique com o botão direito no app e selecione **Abrir** (ou execute `xattr -cr "/Applications/Dutix GUI.app"` no Terminal).
+
+            ---
+
+            ### ✨ Funcionalidades Destaques da Versão
+            - **Dashboard com Métricas em Tempo Real**: Total de associações ativas por categoria (Browser, IDE, Terminal, Mídia, Documentos) com atalhos de 1 clique.
+            - **Catálogo de Aplicativos (Apps)**: Busca inteligente por nome e Bundle ID, inspeção de extensões/UTIs suportadas e visualização de ícones de alta resolução.
+            - **Associação Rápida & Dry-Run (Set)**: Interface interativa com chips para extensões, esquemas URL e UTIs, com suporte completo a simulação de impacto antes da aplicação real.
+            - **Migração Inteligente (Migrate)**: Transferência em lote de associações de um aplicativo de origem para outro de destino com seleção individual e backup automático.
+            - **Inspetor de Alvos & Conflitos (Targets)**: Diagnóstico de múltiplos manipuladores para uma mesma extensão e resolução com 1 clique.
+            - **Galeria de Presets (Dotfiles)**: Exportação e importação de perfis JSON (Development, Media Pro, Privacy, Minimalist) para sincronização entre máquinas.
+            - **Motor de Segurança & Rollback (Snapshots)**: Criação automática de ponto de restauração antes de qualquer alteração, histórico detalhado com comparação de diff e rollback com 1 clique.
+            - **Gestor do Binário dutix**: Detecção automática no PATH do sistema (`/usr/local/bin`, `/opt/homebrew/bin`, `~/Library`), download e atualização com 1 clique direto dos releases oficiais do GitHub.
+            - **Universal Binary**: Pacote único compatível nativamente com Apple Silicon (M1/M2/M3/M4) e processadores Intel (x86_64).
           files: |
             dist/*.zip
             dist/*checksums.txt
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
