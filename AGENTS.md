@@ -136,3 +136,20 @@ make release
 | `make test-coverage` | Gera relatório de cobertura de código |
 | `make clean` | Remove arquivos gerados em `build/` e `dist/` |
 | `make help` | Exibe resumo formatado dos comandos |
+
+---
+
+## 6. Registro de Versões e Features
+
+### **v1.0.0 (Initial Release)**
+- **Dashboard Interativo**: Métricas em tempo real de associações ativas por categoria (Browser, IDE, Terminal, Mídia, Documentos), atalhos de 1-clique para navegadores e editores padrão.
+- **Catálogo de Aplicativos (Apps)**: Busca inteligente por nome e Bundle ID, inspeção de extensões/UTIs suportadas e visualização de ícones de alta resolução extraídos do sistema.
+- **Associação Rápida & Dry-Run (Set)**: Interface com chips para extensões, esquemas URL e UTIs, com suporte completo a simulação de impacto antes da aplicação real.
+- **Migração Inteligente (Migrate)**: Transferência em lote de associações de um aplicativo de origem para outro de destino com seleção individual e backup automático.
+- **Inspetor de Alvos & Conflitos (Targets)**: Diagnóstico de múltiplos manipuladores para uma mesma extensão e resolução com 1 clique.
+- **Galeria de Presets (Dotfiles)**: Exportação e importação de perfis JSON (Development, Media Pro, Privacy, Minimalist) para sincronização entre máquinas.
+- **Motor de Segurança & Rollback (Snapshots)**: Criação automática de ponto de restauração antes de qualquer alteração, histórico detalhado com comparação de diff e rollback com 1 clique.
+- **Gestor do Binário dutix**: Detecção automática no PATH do sistema (`/usr/local/bin`, `/opt/homebrew/bin`, `~/Library`), download e atualização com 1 clique direto dos releases oficiais do GitHub.
+- **Console de Execução em Tempo Real (Logs)**: Monitoramento completo com visualização de comandos executados, STDOUT, STDERR, tempos de execução e exportação em texto puro.
+- **Pipeline CI/CD**: Automação via GitHub Actions para compilação Universal Binary (`darwin/universal`) e publicação de pacotes `.zip` e checksums SHA256 no GitHub Releases.
+
