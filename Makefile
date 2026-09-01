@@ -81,11 +81,11 @@ package: build-darwin-universal ## Empacota o build universal em arquivo .zip e 
 
 test: ## Executa todos os testes unitários do backend em Go
 	@echo "🧪 Executando testes unitários..."
-	$(GO) test -v ./...
+	$(GO) test -v ./pkg/...
 
 test-coverage: ## Executa testes com relatório de cobertura
 	@echo "📊 Gerando relatório de cobertura de testes..."
-	$(GO) test -coverprofile=coverage.out ./...
+	$(GO) test -coverprofile=coverage.out ./pkg/...
 	$(GO) tool cover -func=coverage.out
 
 lint: ## Verifica tipagem do frontend TypeScript e formatação Go
