@@ -15,7 +15,8 @@ import {
   Archive,
   Globe,
   AlertCircle,
-  CheckCircle2
+  CheckCircle2,
+  Command
 } from 'lucide-react'
 import { dutix } from '../../../wailsjs/go/models'
 import { SetHandler } from '../../../wailsjs/go/main/App'
@@ -98,6 +99,20 @@ export const SetHandlersView: React.FC<SetHandlersViewProps> = ({
     if (initialExtensions.length > 0) setSelectedExtensions(initialExtensions)
     if (initialUTIs.length > 0) setSelectedUTIs(initialUTIs)
   }, [initialApp, initialExtensions, initialUTIs])
+
+  // Keyboard shortcut listener for Cmd + Enter to simulate
+  useEffect(() => {
+    const handleKeyDown = (e: KeyboardEvent) => {
+      if ((e.metaKey || e.ctrlKey) && e.key === 'Enter') {
+        e.preventDefault()
+        if (selectedApp && (selectedExtensions.length > 0 || selectedSchemes.length > 0 || selectedUTIs.length > 0)) {
+          handleSimulate()
+        }
+      }
+    }
+    window.addEventListener('keydown', handleKeyDown)
+    return () => window.removeEventListener('keydown', handleKeyDown)
+  }, [selectedApp, selectedExtensions, selectedSchemes, selectedUTIs])
 
   const filteredApps = apps.filter(
     (a) =>
@@ -187,7 +202,7 @@ export const SetHandlersView: React.FC<SetHandlersViewProps> = ({
       {/* Header */}
       <div>
         <h2 className="text-xl font-bold text-white tracking-tight">Associação Rápida de Aplicativos</h2>
-        <p className="text-xs text-slate-400">
+        <p className="text-xs text-slate-400 mt-0.5">
           Defina o aplicativo padrão do macOS para extensões de arquivo, identificadores de tipo (UTIs) e protocolos web.
         </p>
       </div>
@@ -203,20 +218,20 @@ export const SetHandlersView: React.FC<SetHandlersViewProps> = ({
         >
           <div className="flex items-center gap-2">
             {alert.type === 'success' ? (
-              <CheckCircle2 className="w-4 h-4 shrink-0" />
+              <CheckCircle2 className="w-4 h-4 shrink-0 text-emerald-400" />
             ) : (
-              <AlertCircle className="w-4 h-4 shrink-0" />
+              <AlertCircle className="w-4 h-4 shrink-0 text-rose-400" />
             )}
             <span>{alert.message}</span>
           </div>
-          <button onClick={() => setAlert(null)} className="text-slate-400 hover:text-slate-200">
+          <button onClick={() => setAlert(null)} className="text-slate-400 hover:text-white cursor-pointer">
             <X className="w-4 h-4" />
           </button>
         </div>
       )}
 
       {/* Step 1: Target App Selection */}
-      <div className="p-6 rounded-3xl bg-slate-900/60 border border-slate-800 space-y-4 backdrop-blur-sm">
+      <div className="p-6 rounded-3xl bg-slate-900/60 border border-white/[0.08] space-y-4 backdrop-blur-sm">
         <div className="flex items-center gap-2 text-sm font-semibold text-white">
           <div className="w-6 h-6 rounded-full bg-indigo-600 text-white flex items-center justify-center text-xs font-mono">
             1
@@ -227,7 +242,7 @@ export const SetHandlersView: React.FC<SetHandlersViewProps> = ({
         <div className="relative">
           <div
             onClick={() => setIsAppDropdownOpen(!isAppDropdownOpen)}
-            className="w-full p-3.5 bg-slate-950 border border-slate-800 hover:border-slate-700 rounded-2xl flex items-center justify-between cursor-pointer transition-colors"
+            className="w-full p-3.5 bg-slate-950/80 border border-white/[0.08] hover:border-slate-700 rounded-2xl flex items-center justify-between cursor-pointer transition-colors"
           >
             {selectedApp ? (
               <div className="flex items-center gap-3">
@@ -236,28 +251,28 @@ export const SetHandlersView: React.FC<SetHandlersViewProps> = ({
                 </div>
                 <div>
                   <div className="font-semibold text-white text-xs">{selectedApp}</div>
-                  <div className="text-[10px] text-slate-500 font-mono">
+                  <div className="text-[11px] text-slate-400 font-mono">
                     {apps.find((a) => a.name === selectedApp)?.bundle_id || 'App selecionado'}
                   </div>
                 </div>
               </div>
             ) : (
-              <span className="text-slate-500 text-xs">Clique para selecionar um aplicativo...</span>
+              <span className="text-slate-400 text-xs">Clique para selecionar um aplicativo...</span>
             )}
-            <Search className="w-4 h-4 text-slate-500" />
+            <Search className="w-4 h-4 text-slate-400" />
           </div>
 
           {/* Searchable Dropdown */}
           {isAppDropdownOpen && (
-            <div className="absolute left-0 right-0 top-full mt-2 z-30 bg-slate-900 border border-slate-800 rounded-2xl shadow-2xl overflow-hidden max-h-64 flex flex-col">
-              <div className="p-3 border-b border-slate-800">
+            <div className="absolute left-0 right-0 top-full mt-2 z-30 bg-slate-900 border border-white/[0.1] rounded-2xl shadow-2xl overflow-hidden max-h-64 flex flex-col backdrop-blur-2xl">
+              <div className="p-3 border-b border-white/[0.06]">
                 <input
                   type="text"
                   placeholder="Pesquisar aplicativo..."
                   value={appSearch}
                   onChange={(e) => setAppSearch(e.target.value)}
                   autoFocus
-                  className="w-full px-3 py-1.5 bg-slate-950 border border-slate-800 rounded-lg text-xs text-slate-100 focus:outline-none focus:border-indigo-500"
+                  className="w-full px-3 py-1.5 bg-slate-950 border border-white/[0.08] rounded-xl text-xs text-slate-100 focus:border-indigo-500"
                 />
               </div>
               <div className="flex-1 overflow-y-auto p-2 space-y-1">
@@ -268,14 +283,14 @@ export const SetHandlersView: React.FC<SetHandlersViewProps> = ({
                       setSelectedApp(a.name)
                       setIsAppDropdownOpen(false)
                     }}
-                    className="w-full text-left p-2 rounded-xl hover:bg-slate-800 flex items-center gap-3 text-xs text-slate-200 transition-colors cursor-pointer"
+                    className="w-full text-left p-2 rounded-xl hover:bg-white/[0.06] flex items-center gap-3 text-xs text-slate-200 transition-colors cursor-pointer active:scale-[0.99]"
                   >
                     <div className="w-6 h-6 rounded-lg bg-indigo-500/10 border border-indigo-500/30 flex items-center justify-center text-indigo-400 text-xs font-bold shrink-0">
                       {a.name.charAt(0).toUpperCase()}
                     </div>
                     <div className="min-w-0 flex-1">
                       <div className="font-semibold truncate">{a.name}</div>
-                      <div className="text-[10px] text-slate-500 font-mono truncate">{a.bundle_id}</div>
+                      <div className="text-[10px] text-slate-400 font-mono truncate">{a.bundle_id}</div>
                     </div>
                     {selectedApp === a.name && <Check className="w-4 h-4 text-indigo-400 shrink-0" />}
                   </button>
@@ -287,7 +302,7 @@ export const SetHandlersView: React.FC<SetHandlersViewProps> = ({
       </div>
 
       {/* Step 2: Extensions & Categories */}
-      <div className="p-6 rounded-3xl bg-slate-900/60 border border-slate-800 space-y-6 backdrop-blur-sm">
+      <div className="p-6 rounded-3xl bg-slate-900/60 border border-white/[0.08] space-y-6 backdrop-blur-sm">
         <div className="flex items-center justify-between">
           <div className="flex items-center gap-2 text-sm font-semibold text-white">
             <div className="w-6 h-6 rounded-full bg-indigo-600 text-white flex items-center justify-center text-xs font-mono">
@@ -297,7 +312,7 @@ export const SetHandlersView: React.FC<SetHandlersViewProps> = ({
           </div>
 
           <div className="text-xs text-slate-400 font-mono">
-            <strong className="text-indigo-400">{selectedExtensions.length}</strong> extensões selecionadas
+            <strong className="text-indigo-400 font-semibold">{selectedExtensions.length}</strong> extensões selecionadas
           </div>
         </div>
 
@@ -309,7 +324,7 @@ export const SetHandlersView: React.FC<SetHandlersViewProps> = ({
             const someSelected = cat.extensions.some((e) => selectedExtensions.includes(e))
 
             return (
-              <div key={cat.id} className="p-4 rounded-2xl bg-slate-950/60 border border-slate-800/80 space-y-3">
+              <div key={cat.id} className="p-4 rounded-2xl bg-slate-950/60 border border-white/[0.06] space-y-3">
                 <div className="flex items-center justify-between">
                   <div className="flex items-center gap-2 text-xs font-semibold text-slate-200">
                     <Icon className="w-4 h-4 text-indigo-400" />
@@ -317,7 +332,7 @@ export const SetHandlersView: React.FC<SetHandlersViewProps> = ({
                   </div>
                   <button
                     onClick={() => toggleCategory(cat)}
-                    className="text-[11px] font-medium text-indigo-400 hover:text-indigo-300 transition-colors cursor-pointer"
+                    className="text-xs font-medium text-indigo-400 hover:text-indigo-300 transition-colors cursor-pointer"
                   >
                     {isAllSelected ? 'Desmarcar Todos' : 'Selecionar Categoria'}
                   </button>
@@ -330,10 +345,10 @@ export const SetHandlersView: React.FC<SetHandlersViewProps> = ({
                       <button
                         key={ext}
                         onClick={() => toggleExtension(ext)}
-                        className={`px-2.5 py-1 rounded-lg text-xs font-mono font-medium border transition-all cursor-pointer ${
+                        className={`px-2.5 py-1 rounded-xl text-xs font-mono font-medium border transition-all cursor-pointer active:scale-[0.95] ${
                           isSelected
-                            ? 'bg-indigo-600 border-indigo-500 text-white shadow-sm shadow-indigo-600/30'
-                            : 'bg-slate-900/80 border-slate-800 text-slate-400 hover:border-slate-700 hover:text-slate-200'
+                            ? 'bg-indigo-600 border-indigo-500 text-white shadow-sm shadow-indigo-600/30 font-semibold'
+                            : 'bg-slate-900/80 border-white/[0.06] text-slate-300 hover:border-slate-700 hover:text-white'
                         }`}
                       >
                         .{ext}
@@ -347,7 +362,7 @@ export const SetHandlersView: React.FC<SetHandlersViewProps> = ({
         </div>
 
         {/* Custom Extension Input */}
-        <div className="p-4 rounded-2xl bg-slate-950/60 border border-slate-800/80 space-y-2">
+        <div className="p-4 rounded-2xl bg-slate-950/60 border border-white/[0.06] space-y-2">
           <div className="text-xs font-semibold text-slate-200 flex items-center gap-2">
             <Plus className="w-3.5 h-3.5 text-indigo-400" />
             <span>Adicionar Extensões Personalizadas</span>
@@ -364,11 +379,11 @@ export const SetHandlersView: React.FC<SetHandlersViewProps> = ({
                   handleAddCustom()
                 }
               }}
-              className="flex-1 px-3 py-2 bg-slate-900 border border-slate-800 rounded-xl text-xs text-slate-100 placeholder-slate-500 focus:outline-none focus:border-indigo-500 font-mono"
+              className="flex-1 px-3 py-2 bg-slate-900 border border-white/[0.08] rounded-xl text-xs text-slate-100 placeholder-slate-500 focus:border-indigo-500 font-mono"
             />
             <button
               onClick={handleAddCustom}
-              className="px-4 py-2 bg-slate-800 hover:bg-slate-700 text-slate-200 text-xs font-semibold rounded-xl border border-slate-700 transition-colors cursor-pointer"
+              className="px-4 py-2 bg-slate-800 hover:bg-slate-700 text-slate-200 text-xs font-semibold rounded-xl border border-white/[0.08] transition-all cursor-pointer active:scale-[0.97]"
             >
               Adicionar
             </button>
@@ -376,7 +391,7 @@ export const SetHandlersView: React.FC<SetHandlersViewProps> = ({
         </div>
 
         {/* URL Schemes */}
-        <div className="p-4 rounded-2xl bg-slate-950/60 border border-slate-800/80 space-y-3">
+        <div className="p-4 rounded-2xl bg-slate-950/60 border border-white/[0.06] space-y-3">
           <div className="text-xs font-semibold text-slate-200 flex items-center gap-2">
             <Globe className="w-4 h-4 text-blue-400" />
             <span>Esquemas de Protocolo / URL Schemes</span>
@@ -388,10 +403,10 @@ export const SetHandlersView: React.FC<SetHandlersViewProps> = ({
                 <button
                   key={scheme}
                   onClick={() => toggleScheme(scheme)}
-                  className={`px-3 py-1 rounded-lg text-xs font-mono font-medium border transition-all cursor-pointer ${
+                  className={`px-3 py-1 rounded-xl text-xs font-mono font-medium border transition-all cursor-pointer active:scale-[0.95] ${
                     isSelected
-                      ? 'bg-blue-600 border-blue-500 text-white shadow-sm shadow-blue-600/30'
-                      : 'bg-slate-900/80 border-slate-800 text-slate-400 hover:border-slate-700 hover:text-slate-200'
+                      ? 'bg-blue-600 border-blue-500 text-white shadow-sm shadow-blue-600/30 font-semibold'
+                      : 'bg-slate-900/80 border-white/[0.06] text-slate-300 hover:border-slate-700 hover:text-white'
                   }`}
                 >
                   {scheme}://
@@ -403,7 +418,7 @@ export const SetHandlersView: React.FC<SetHandlersViewProps> = ({
       </div>
 
       {/* Action Footer */}
-      <div className="flex flex-col sm:flex-row gap-3 items-center justify-between p-6 rounded-3xl bg-slate-900/90 border border-slate-800">
+      <div className="flex flex-col sm:flex-row gap-3 items-center justify-between p-6 rounded-3xl bg-slate-900/90 border border-white/[0.08] backdrop-blur-xl">
         <div className="text-xs text-slate-400">
           Pronto para associar <strong className="text-white">{selectedExtensions.length} extensões</strong> ao app{' '}
           <strong className="text-indigo-300">{selectedApp || '(Nenhum app selecionado)'}</strong>
@@ -413,7 +428,8 @@ export const SetHandlersView: React.FC<SetHandlersViewProps> = ({
           <button
             onClick={handleSimulate}
             disabled={loadingDryRun || !selectedApp}
-            className="flex items-center gap-2 px-5 py-2.5 rounded-xl bg-slate-800 hover:bg-slate-700 text-slate-200 border border-slate-700 text-xs font-semibold transition-all disabled:opacity-50 cursor-pointer"
+            className="flex items-center gap-2 px-5 py-2.5 rounded-xl bg-slate-800 hover:bg-slate-700 text-slate-200 border border-white/[0.08] text-xs font-semibold transition-all disabled:opacity-50 cursor-pointer active:scale-[0.98]"
+            title="Simular alterações (Atalho: ⌘ + Enter)"
           >
             {loadingDryRun ? (
               <div className="w-3.5 h-3.5 border-2 border-indigo-400 border-t-transparent rounded-full animate-spin" />
@@ -426,7 +442,7 @@ export const SetHandlersView: React.FC<SetHandlersViewProps> = ({
           <button
             onClick={handleApplyChanges}
             disabled={applying || !selectedApp}
-            className="flex items-center gap-2 px-6 py-2.5 rounded-xl bg-indigo-600 hover:bg-indigo-500 text-white text-xs font-semibold transition-all shadow-lg shadow-indigo-600/30 disabled:opacity-50 cursor-pointer"
+            className="flex items-center gap-2 px-6 py-2.5 rounded-xl bg-indigo-600 hover:bg-indigo-500 text-white text-xs font-semibold transition-all shadow-md shadow-indigo-600/30 disabled:opacity-50 cursor-pointer active:scale-[0.98]"
           >
             {applying ? (
               <div className="w-3.5 h-3.5 border-2 border-white border-t-transparent rounded-full animate-spin" />

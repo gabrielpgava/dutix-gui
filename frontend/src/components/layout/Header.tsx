@@ -24,14 +24,14 @@ export const Header: React.FC<HeaderProps> = ({
   version
 }) => {
   return (
-    <header className="h-[84px] pt-4 border-b border-slate-800/80 bg-slate-900/50 backdrop-blur-md px-6 flex items-center justify-between shrink-0 select-none window-drag-region">
+    <header className="h-[84px] pt-4 border-b border-white/[0.06] bg-slate-900/60 backdrop-blur-xl px-6 flex items-center justify-between shrink-0 select-none window-drag-region">
       {/* Title & info */}
       <div className="flex flex-col window-no-drag">
-        <h1 className="text-base font-semibold text-slate-100 flex items-center gap-2">
+        <h1 className="text-base font-semibold text-white flex items-center gap-2 tracking-tight">
           {title}
           {loading && <RefreshCw className="w-3.5 h-3.5 text-indigo-400 animate-spin" />}
         </h1>
-        {subtitle && <p className="text-xs text-slate-400">{subtitle}</p>}
+        {subtitle && <p className="text-xs text-slate-400 font-normal">{subtitle}</p>}
       </div>
 
       {/* Action controls */}
@@ -39,7 +39,7 @@ export const Header: React.FC<HeaderProps> = ({
         {onOpenQuickPreset && (
           <button
             onClick={onOpenQuickPreset}
-            className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-indigo-600/20 hover:bg-indigo-600/30 text-indigo-300 border border-indigo-500/30 text-xs font-medium transition-all shadow-sm cursor-pointer"
+            className="flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-indigo-500/15 hover:bg-indigo-500/25 text-indigo-300 border border-indigo-500/30 text-xs font-medium transition-all shadow-sm cursor-pointer active:scale-[0.98]"
             title="Aplicar Preset Rápido"
           >
             <Sparkles className="w-3.5 h-3.5 text-indigo-400" />
@@ -51,8 +51,9 @@ export const Header: React.FC<HeaderProps> = ({
           <button
             onClick={onRefresh}
             disabled={loading}
-            className="p-1.5 rounded-lg bg-slate-800/80 hover:bg-slate-700/80 text-slate-300 border border-slate-700/50 transition-colors disabled:opacity-50 cursor-pointer"
+            className="p-2 rounded-xl bg-slate-800/60 hover:bg-slate-700/60 text-slate-300 border border-white/[0.08] transition-all disabled:opacity-50 cursor-pointer active:scale-[0.96]"
             title="Atualizar dados"
+            aria-label="Atualizar dados"
           >
             <RefreshCw className={cn('w-4 h-4', loading && 'animate-spin text-indigo-400')} />
           </button>
@@ -60,7 +61,7 @@ export const Header: React.FC<HeaderProps> = ({
 
         <button
           onClick={onOpenBinaryModal}
-          className="flex items-center gap-1.5 px-2.5 py-1.5 rounded-lg bg-slate-800/60 hover:bg-slate-700/60 text-slate-300 border border-slate-700/50 text-xs font-mono transition-colors cursor-pointer"
+          className="flex items-center gap-1.5 px-2.5 py-1.5 rounded-xl bg-slate-800/60 hover:bg-slate-700/60 text-slate-300 border border-white/[0.08] text-xs font-mono transition-all cursor-pointer active:scale-[0.98]"
           title="Gerenciar binário dutix"
         >
           <ShieldCheck className="w-3.5 h-3.5 text-emerald-400" />
@@ -69,8 +70,9 @@ export const Header: React.FC<HeaderProps> = ({
 
         <button
           onClick={onOpenLogs}
-          className="p-1.5 rounded-lg bg-slate-800/60 hover:bg-slate-700/60 text-slate-300 border border-slate-700/50 transition-colors cursor-pointer"
+          className="p-2 rounded-xl bg-slate-800/60 hover:bg-slate-700/60 text-slate-300 border border-white/[0.08] transition-all cursor-pointer active:scale-[0.96]"
           title="Abrir Console de Logs"
+          aria-label="Abrir Console de Logs"
         >
           <Terminal className="w-4 h-4 text-slate-400 hover:text-slate-200" />
         </button>
