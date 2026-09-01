@@ -27,8 +27,12 @@ interface SidebarProps {
   onSelectTab: (tab: NavTab) => void
   onOpenLogs: () => void
   onOpenBinaryModal: () => void
+  onOpenUpdateModal?: () => void
   binaryInstalled: boolean
   conflictCount: number
+  appVersion?: string
+  updateAvailable?: boolean
+  latestAppVersion?: string
 }
 
 export const Sidebar: React.FC<SidebarProps> = ({
@@ -36,8 +40,12 @@ export const Sidebar: React.FC<SidebarProps> = ({
   onSelectTab,
   onOpenLogs,
   onOpenBinaryModal,
+  onOpenUpdateModal,
   binaryInstalled,
-  conflictCount
+  conflictCount,
+  appVersion,
+  updateAvailable,
+  latestAppVersion
 }) => {
   const navItems = [
     { id: 'dashboard' as NavTab, label: 'Painel Geral', icon: LayoutDashboard },
@@ -107,6 +115,22 @@ export const Sidebar: React.FC<SidebarProps> = ({
 
       {/* Bottom status & action buttons */}
       <div className="p-3 border-t border-slate-200 space-y-2 bg-slate-100/60">
+        {/* Update available indicator banner */}
+        {updateAvailable && onOpenUpdateModal && (
+          <button
+            onClick={onOpenUpdateModal}
+            className="w-full flex items-center justify-between p-2.5 rounded-xl border border-indigo-300 bg-gradient-to-r from-indigo-500 to-indigo-600 text-white text-xs font-bold transition-all cursor-pointer active:scale-[0.99] shadow-md shadow-indigo-500/20 hover:from-indigo-600 hover:to-indigo-700 animate-pulse"
+          >
+            <div className="flex items-center gap-2">
+              <Sparkles className="w-3.5 h-3.5 text-amber-300" />
+              <span>Update v{latestAppVersion || 'novo'}</span>
+            </div>
+            <span className="text-[10px] bg-white/20 px-2 py-0.5 rounded-full font-mono font-bold">
+              Atualizar
+            </span>
+          </button>
+        )}
+
         {/* Binary status indicator */}
         <button
           onClick={onOpenBinaryModal}
@@ -126,14 +150,26 @@ export const Sidebar: React.FC<SidebarProps> = ({
           </span>
         </button>
 
-        {/* Logs Drawer Trigger */}
-        <button
-          onClick={onOpenLogs}
-          className="w-full flex items-center gap-2.5 px-3 py-2 rounded-xl text-xs font-semibold text-slate-600 hover:text-slate-900 hover:bg-slate-200/70 transition-colors border border-slate-200 cursor-pointer active:scale-[0.99] bg-white shadow-xs"
-        >
-          <Terminal className="w-3.5 h-3.5 text-indigo-600" />
-          <span>Console de Logs</span>
-        </button>
+        {/* Logs Drawer Trigger & App Version */}
+        <div className="flex items-center gap-2">
+          <button
+            onClick={onOpenLogs}
+            className="flex-1 flex items-center gap-2 px-3 py-2 rounded-xl text-xs font-semibold text-slate-600 hover:text-slate-900 hover:bg-slate-200/70 transition-colors border border-slate-200 cursor-pointer active:scale-[0.99] bg-white shadow-xs"
+          >
+            <Terminal className="w-3.5 h-3.5 text-indigo-600" />
+            <span>Logs</span>
+          </button>
+
+          {onOpenUpdateModal && (
+            <button
+              onClick={onOpenUpdateModal}
+              className="px-2.5 py-2 rounded-xl text-[11px] font-mono font-bold text-slate-600 hover:text-indigo-600 hover:bg-slate-200/70 transition-colors border border-slate-200 cursor-pointer active:scale-[0.99] bg-white shadow-xs"
+              title="Verificar atualizações do Dutix GUI"
+            >
+              v{appVersion || '1.0.1'}
+            </button>
+          )}
+        </div>
       </div>
     </aside>
   )

@@ -18,6 +18,7 @@ O **Dutix GUI** é uma interface gráfica nativa para macOS desenvolvida em **Wa
 ┌──────────────────────────▼─────────────────────────────┐
 │                 Backend (Go 1.22+)                     │
 │  pkg/dutix (Executor, Parser, Types)                   │
+│  pkg/autoupdate (GitHub GUI Releases & In-Place Relaunch)
 │  pkg/binary (Locator, GitHub Releases Downloader)      │
 │  pkg/snapshots (Safety Backup & Rollback Engine)       │
 │  pkg/presets (Dotfiles & Configuration Profiles)       │
@@ -47,6 +48,7 @@ dutix-gui/
 ├── .github/workflows/
 │   └── release.yml             # Workflow de CI/CD para GitHub Releases
 ├── pkg/
+│   ├── autoupdate/             # Verificação de releases do GUI, download e in-place relaunch
 │   ├── binary/                 # Detecção, busca no PATH e download da release no GitHub
 │   ├── dutix/                  # Execução de subprocessos CLI e parsers de saída/JSON
 │   ├── logs/                   # Histórico de execuções com STDOUT/STDERR e métricas
@@ -69,6 +71,7 @@ dutix-gui/
     │       ├── presets/        # Galeria de perfis dotfiles
     │       ├── snapshots/      # Histórico de snapshots e rollback
     │       ├── binary/         # Modal de gestão e atualização do binário
+    │       ├── updater/        # Modal de auto-update da interface com changelog e progresso
     │       └── logs/           # Drawer do console de logs
 ```
 
@@ -140,6 +143,12 @@ make release
 ---
 
 ## 6. Registro de Versões e Features
+
+### **v1.1.0 (Auto-Update Engine & UX Enhancements)**
+- **Módulo Nativo de Auto-Update (`pkg/autoupdate`)**: Verificação automática e silenciosa em segundo plano de novas releases do Dutix GUI no GitHub (`gabrielpgava/dutix-gui`).
+- **Modal Interativo de Atualização (`UpdateModal`)**: Comparativo de versões (`vAtual` vs `vNova`), exibição detalhada de release notes / changelog do GitHub e barra de progresso em tempo real (download streaming).
+- **Substituição In-Place & Relaunch no macOS**: Download e extração segura do bundle `.app`, remoção de quarentena (`xattr -cr`), substituição atômica via processo desacoplado e reinicialização com 1 clique.
+- **Indicadores Visuais de Nova Versão**: Botão animado no Header e badge no Sidebar indicando quando há atualização disponível, além de verificação sob demanda.
 
 ### **v1.0.1 (Bugfix & UX Improvements)**
 - **Correção de Associações por Extensão**: Corrigido o envio implícito de UTIs amplas do macOS que sobrescreviam extensões desmarcadas pelo usuário ao definir manipuladores padrão a partir do Catálogo de Aplicativos.

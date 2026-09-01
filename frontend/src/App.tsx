@@ -9,8 +9,9 @@ import { TargetsView } from './components/targets/TargetsView'
 import { PresetsView } from './components/presets/PresetsView'
 import { SnapshotsView } from './components/snapshots/SnapshotsView'
 import { BinaryManagerModal } from './components/binary/BinaryManagerModal'
+import { UpdateModal } from './components/updater/UpdateModal'
 import { LogConsoleDrawer } from './components/logs/LogConsoleDrawer'
-import { dutix, presets, snapshots } from '../wailsjs/go/models'
+import { dutix, presets, snapshots, autoupdate } from '../wailsjs/go/models'
 import {
   GetBinaryStatus,
   ListApps,
@@ -18,7 +19,9 @@ import {
   DetectConflicts,
   ListPresets,
   ListSnapshots,
-  SetHandler
+  SetHandler,
+  GetAppVersion,
+  CheckForAppUpdate
 } from '../wailsjs/go/main/App'
 
 export function App() {
@@ -29,6 +32,10 @@ export function App() {
   const [conflicts, setConflicts] = useState<dutix.ConflictItem[]>([])
   const [presetsList, setPresetsList] = useState<presets.Preset[]>([])
   const [snapshotsList, setSnapshotsList] = useState<snapshots.Snapshot[]>([])
+
+  const [appVersion, setAppVersion] = useState<string>('1.0.1')
+  const [updateInfo, setUpdateInfo] = useState<autoupdate.UpdateCheckResult | null>(null)
+  const [updateModalOpen, setUpdateModalOpen] = useState(false)
 
   const [loading, setLoading] = useState(false)
   const [binaryModalOpen, setBinaryModalOpen] = useState(false)
@@ -43,6 +50,22 @@ export function App() {
   const loadAllData = useCallback(async () => {
     setLoading(true)
     try {
+      // App Version
+      try {
+        const v = await GetAppVersion()
+        if (v) setAppVersion(v)
+      } catch (e) {
+        console.warn('Failed to get app version:', e)
+      }
+
+      // Check for GUI update in background
+      try {
+        const updateRes = await CheckForAppUpdate()
+        setUpdateInfo(updateRes)
+      } catch (e) {
+        console.warn('Failed to check for updates:', e)
+      }
+
       // Binary status
       const bStatus = await GetBinaryStatus()
       setBinaryStatus(bStatus)
@@ -124,8 +147,12 @@ export function App() {
         onSelectTab={(tab) => setCurrentTab(tab)}
         onOpenLogs={() => setLogsDrawerOpen(true)}
         onOpenBinaryModal={() => setBinaryModalOpen(true)}
+        onOpenUpdateModal={() => setUpdateModalOpen(true)}
         binaryInstalled={binaryStatus?.installed || false}
         conflictCount={conflicts.length}
+        appVersion={appVersion}
+        updateAvailable={updateInfo?.updateAvailable || false}
+        latestAppVersion={updateInfo?.latestVersion}
       />
 
       {/* Main View Area */}
@@ -140,7 +167,10 @@ export function App() {
           onOpenBinaryModal={() => setBinaryModalOpen(true)}
           onOpenLogs={() => setLogsDrawerOpen(true)}
           onOpenQuickPreset={() => setCurrentTab('presets')}
+          onOpenUpdateModal={() => setUpdateModalOpen(true)}
           version={binaryStatus?.version}
+          updateAvailable={updateInfo?.updateAvailable || false}
+          latestAppVersion={updateInfo?.latestVersion}
         />
 
         <main className="flex-1 overflow-hidden relative">
@@ -216,6 +246,14 @@ export function App() {
         isOpen={binaryModalOpen}
         onClose={() => setBinaryModalOpen(false)}
         onStatusChanged={loadAllData}
+      />
+
+      {/* GUI Auto-Update Modal */}
+      <UpdateModal
+        isOpen={updateModalOpen}
+        onClose={() => setUpdateModalOpen(false)}
+        initialUpdateInfo={updateInfo}
+        onUpdateApplied={() => setUpdateModalOpen(false)}
       />
 
       {/* Log Console Drawer */}

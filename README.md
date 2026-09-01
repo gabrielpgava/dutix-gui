@@ -99,6 +99,11 @@
 - Slide-out drawer with a complete history of all CLI subprocess executions dispatched by the backend.
 - Inspect exact CLI parameters, execution duration in milliseconds, exit status codes, and raw output (STDOUT / STDERR) with 1-click copy.
 
+#### 10. ⚡️ In-App Auto-Update & GitHub Release Downloader
+- Automatic background check for new Dutix GUI releases on GitHub (`gabrielpgava/dutix-gui`).
+- Interactive modal with version comparison, release changelog notes, and live streaming progress bar.
+- Seamless macOS in-place `.app` replacement, quarantine removal (`xattr -cr`), and automatic relaunch in 1 click.
+
 ---
 
 ### 🚀 Getting Started
@@ -270,6 +275,11 @@ O **Dutix GUI** é um aplicativo desktop nativo, moderno e de código aberto (op
 #### 9. 🪵 Console de Logs Embutido
 - Painel lateral retrátil (drawer) com histórico completo de todas as execuções CLI disparadas pelo backend.
 - Exibição dos parâmetros exatos, tempo de resposta em milissegundos, código de saída e saída bruta (STDOUT / STDERR) com suporte a cópia rápida.
+
+#### 10. ⚡️ Auto-Update Integrado & Atualização In-Place
+- Verificação silenciosa e automática em segundo plano por novas versões no GitHub (`gabrielpgava/dutix-gui`).
+- Modal interativo com comparativo de versões, notas da release (changelog) e download com barra de progresso em tempo real.
+- Substituição atômica in-place do pacote `.app`, remoção de atributos de quarentena (`xattr -cr`) e reinicialização com 1 clique.
 
 ---
 

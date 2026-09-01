@@ -1,3 +1,36 @@
+export namespace autoupdate {
+	
+	export class UpdateCheckResult {
+	    updateAvailable: boolean;
+	    currentVersion: string;
+	    latestVersion: string;
+	    releaseName: string;
+	    releaseNotes: string;
+	    releaseUrl: string;
+	    downloadUrl: string;
+	    assetSize: number;
+	    publishedAt: string;
+	
+	    static createFrom(source: any = {}) {
+	        return new UpdateCheckResult(source);
+	    }
+	
+	    constructor(source: any = {}) {
+	        if ('string' === typeof source) source = JSON.parse(source);
+	        this.updateAvailable = source["updateAvailable"];
+	        this.currentVersion = source["currentVersion"];
+	        this.latestVersion = source["latestVersion"];
+	        this.releaseName = source["releaseName"];
+	        this.releaseNotes = source["releaseNotes"];
+	        this.releaseUrl = source["releaseUrl"];
+	        this.downloadUrl = source["downloadUrl"];
+	        this.assetSize = source["assetSize"];
+	        this.publishedAt = source["publishedAt"];
+	    }
+	}
+
+}
+
 export namespace binary {
 	
 	export class GitHubReleaseAsset {

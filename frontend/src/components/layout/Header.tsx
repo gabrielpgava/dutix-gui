@@ -10,7 +10,10 @@ interface HeaderProps {
   onOpenBinaryModal: () => void
   onOpenLogs: () => void
   onOpenQuickPreset?: () => void
+  onOpenUpdateModal?: () => void
   version?: string
+  updateAvailable?: boolean
+  latestAppVersion?: string
 }
 
 export const Header: React.FC<HeaderProps> = ({
@@ -21,7 +24,10 @@ export const Header: React.FC<HeaderProps> = ({
   onOpenBinaryModal,
   onOpenLogs,
   onOpenQuickPreset,
-  version
+  onOpenUpdateModal,
+  version,
+  updateAvailable,
+  latestAppVersion
 }) => {
   return (
     <header className="h-[84px] pt-4 border-b border-slate-200 bg-white/80 backdrop-blur-2xl px-6 flex items-center justify-between shrink-0 select-none window-drag-region shadow-xs">
@@ -36,6 +42,17 @@ export const Header: React.FC<HeaderProps> = ({
 
       {/* Action controls */}
       <div className="flex items-center gap-2.5 window-no-drag">
+        {updateAvailable && onOpenUpdateModal && (
+          <button
+            onClick={onOpenUpdateModal}
+            className="flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-gradient-to-r from-indigo-500 to-indigo-600 hover:from-indigo-600 hover:to-indigo-700 text-white text-xs font-bold transition-all shadow-md shadow-indigo-500/20 cursor-pointer active:scale-[0.98] animate-pulse"
+            title="Nova versão disponível no GitHub"
+          >
+            <Sparkles className="w-3.5 h-3.5 text-amber-300" />
+            <span>Update v{latestAppVersion || 'novo'}</span>
+          </button>
+        )}
+
         {onOpenQuickPreset && (
           <button
             onClick={onOpenQuickPreset}

@@ -4,7 +4,9 @@ import (
 	"context"
 	"fmt"
 	"strings"
+	"time"
 
+	"dutix-gui/pkg/autoupdate"
 	"dutix-gui/pkg/binary"
 	"dutix-gui/pkg/dutix"
 	"dutix-gui/pkg/logs"
@@ -23,6 +25,7 @@ type App struct {
 	executor     *dutix.Executor
 	snapshotMgr  *snapshots.Manager
 	presetMgr    *presets.Manager
+	updater      *autoupdate.Updater
 }
 
 // NewApp creates a new App application struct
@@ -32,6 +35,7 @@ func NewApp() *App {
 	executor := dutix.NewExecutor(binMgr, logger)
 	snapMgr, _ := snapshots.NewManager()
 	presetMgr, _ := presets.NewManager()
+	updater := autoupdate.NewUpdater("gabrielpgava", "dutix-gui")
 
 	return &App{
 		binaryMgr:   binMgr,
@@ -39,6 +43,7 @@ func NewApp() *App {
 		executor:    executor,
 		snapshotMgr: snapMgr,
 		presetMgr:   presetMgr,
+		updater:     updater,
 	}
 }
 
@@ -258,3 +263,43 @@ func (a *App) ClearLogs() {
 		a.logger.Clear()
 	}
 }
+
+// CheckForAppUpdate checks for new releases of Dutix GUI on GitHub
+func (a *App) CheckForAppUpdate() (*autoupdate.UpdateCheckResult, error) {
+	if a.updater == nil {
+		return nil, fmt.Errorf("updater not initialized")
+	}
+	return a.updater.CheckForUpdate()
+}
+
+// DownloadAppUpdate downloads and stages the newest app update
+func (a *App) DownloadAppUpdate() (string, error) {
+	if a.updater == nil {
+		return "", fmt.Errorf("updater not initialized")
+	}
+	progressCallback := func(percent float64, message string) {
+		runtime.EventsEmit(a.ctx, "autoupdate:download-progress", map[string]interface{}{
+			"percent": percent,
+			"message": message,
+		})
+	}
+	return a.updater.DownloadAndExtract(progressCallback)
+}
+
+// ApplyAppUpdateAndRestart triggers the helper script to replace the .app and relaunch it
+func (a *App) ApplyAppUpdateAndRestart(newAppPath string) error {
+	if a.updater == nil {
+		return fmt.Errorf("updater not initialized")
+	}
+	err := a.updater.ApplyUpdateAndRestart(newAppPath)
+	if err != nil {
+		return err
+	}
+	// Exit the current app so the helper script can replace it and relaunch
+	go func() {
+		time.Sleep(500 * time.Millisecond)
+		runtime.Quit(a.ctx)
+	}()
+	return nil
+}
+
