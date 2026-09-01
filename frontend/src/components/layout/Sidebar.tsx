@@ -57,18 +57,19 @@ export const Sidebar: React.FC<SidebarProps> = ({
 
   return (
     <aside className="w-64 bg-slate-900/80 border-r border-slate-800/80 backdrop-blur-xl flex flex-col justify-between select-none h-full z-20 shrink-0">
-      {/* App Branding */}
+      {/* App Branding with macOS Traffic Lights Inset Spacing */}
       <div>
-        <div className="h-16 flex items-center px-5 gap-3 border-b border-slate-800/50 pt-3">
-          <div className="w-8 h-8 rounded-lg bg-gradient-to-br from-indigo-500 to-purple-600 flex items-center justify-center shadow-lg shadow-indigo-500/20 border border-indigo-400/30">
-            <span className="font-mono text-sm font-bold text-white tracking-tighter">dx</span>
+        {/* Top titlebar / drag region for macOS traffic lights */}
+        <div className="h-[84px] pt-9 px-4 pb-3 flex items-center gap-3 border-b border-slate-800/60 window-drag-region">
+          <div className="w-9 h-9 rounded-xl overflow-hidden shadow-lg shadow-indigo-500/20 border border-indigo-500/30 shrink-0 bg-slate-900 window-no-drag">
+            <img src="/appicon.png" alt="Dutix Logo" className="w-full h-full object-cover select-none pointer-events-none" />
           </div>
-          <div>
+          <div className="window-no-drag min-w-0 flex-1">
             <div className="font-semibold text-sm tracking-tight text-white flex items-center gap-1.5">
-              Dutix GUI
-              <span className="text-[10px] uppercase font-mono px-1.5 py-0.5 rounded bg-indigo-500/10 text-indigo-400 border border-indigo-500/20 font-medium">macOS</span>
+              <span className="truncate">Dutix GUI</span>
+              <span className="text-[9px] uppercase font-mono px-1.5 py-0.2 rounded bg-indigo-500/15 text-indigo-300 border border-indigo-500/30 font-semibold tracking-wider shrink-0">macOS</span>
             </div>
-            <p className="text-[11px] text-slate-400 font-normal">Gestor de Associações</p>
+            <p className="text-[11px] text-slate-400 font-normal truncate">Gestor de Associações</p>
           </div>
         </div>
 

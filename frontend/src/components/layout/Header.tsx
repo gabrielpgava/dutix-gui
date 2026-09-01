@@ -24,7 +24,7 @@ export const Header: React.FC<HeaderProps> = ({
   version
 }) => {
   return (
-    <header className="h-16 border-b border-slate-800/80 bg-slate-900/50 backdrop-blur-md px-6 flex items-center justify-between shrink-0 select-none window-drag-region">
+    <header className="h-[84px] pt-4 border-b border-slate-800/80 bg-slate-900/50 backdrop-blur-md px-6 flex items-center justify-between shrink-0 select-none window-drag-region">
       {/* Title & info */}
       <div className="flex flex-col window-no-drag">
         <h1 className="text-base font-semibold text-slate-100 flex items-center gap-2">
