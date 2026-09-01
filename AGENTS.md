@@ -141,6 +141,11 @@ make release
 
 ## 6. Registro de Versões e Features
 
+### **v1.0.1 (Bugfix & UX Improvements)**
+- **Correção de Associações por Extensão**: Corrigido o envio implícito de UTIs amplas do macOS que sobrescreviam extensões desmarcadas pelo usuário ao definir manipuladores padrão a partir do Catálogo de Aplicativos.
+- **Sincronização de Estado & Validação**: Aprimorada a validação e o feedback visual da tela de Associação Rápida quando nenhuma extensão ou protocolo estiver selecionado.
+- **Universal Binary**: Pacote compilado e publicado para macOS Universal (Apple Silicon M1/M2/M3/M4 e Intel x86_64).
+
 ### **v1.0.0 (Initial Release)**
 - **Dashboard Interativo**: Métricas em tempo real de associações ativas por categoria (Browser, IDE, Terminal, Mídia, Documentos), atalhos de 1-clique para navegadores e editores padrão.
 - **Catálogo de Aplicativos (Apps)**: Busca inteligente por nome e Bundle ID, inspeção de extensões/UTIs suportadas e visualização de ícones de alta resolução extraídos do sistema.
