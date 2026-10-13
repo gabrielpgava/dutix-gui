@@ -33,7 +33,7 @@ export const Header: React.FC<HeaderProps> = ({
     <header className="h-[84px] pt-4 border-b border-slate-200 bg-white/80 backdrop-blur-2xl px-6 flex items-center justify-between shrink-0 select-none window-drag-region shadow-xs">
       {/* Title & info */}
       <div className="flex flex-col window-no-drag">
-        <h1 className="text-base font-bold text-slate-900 flex items-center gap-2 tracking-tight">
+        <h1 className="app-route-title text-base font-bold text-slate-900 flex items-center gap-2 tracking-tight">
           {title}
           {loading && <RefreshCw className="w-3.5 h-3.5 text-indigo-600 animate-spin" />}
         </h1>

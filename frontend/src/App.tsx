@@ -26,6 +26,7 @@ import {
 
 export function App() {
   const [currentTab, setCurrentTab] = useState<NavTab>('dashboard')
+  const [useCssRouteTransition, setUseCssRouteTransition] = useState(false)
   const [binaryStatus, setBinaryStatus] = useState<dutix.BinaryStatus | null>(null)
   const [apps, setApps] = useState<dutix.AppInfo[]>([])
   const [targets, setTargets] = useState<dutix.TargetItem[]>([])
@@ -99,16 +100,34 @@ export function App() {
     loadAllData()
   }, [loadAllData])
 
+  const navigateToTab = (tab: NavTab) => {
+    if (tab === currentTab) return
+
+    const reduceMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches
+    const transitionDocument = document as Document & {
+      startViewTransition?: (updateCallback: () => void) => unknown
+    }
+
+    if (!reduceMotion && transitionDocument.startViewTransition) {
+      setUseCssRouteTransition(false)
+      transitionDocument.startViewTransition(() => setCurrentTab(tab))
+      return
+    }
+
+    setUseCssRouteTransition(!reduceMotion)
+    setCurrentTab(tab)
+  }
+
   const handleSetAsDefaultFromApp = (appName: string, exts: string[], utis: string[]) => {
     setSelectedAppForSet(appName)
     setSelectedExtsForSet(exts)
     setSelectedUTIsForSet(utis)
-    setCurrentTab('set')
+    navigateToTab('set')
   }
 
   const handleMigrateFromApp = (appName: string) => {
     setSelectedAppForMigrate(appName)
-    setCurrentTab('migrate')
+    navigateToTab('migrate')
   }
 
   const handleQuickSetDefault = async (appName: string, exts: string[], utis: string[], schemes: string[]) => {
@@ -144,7 +163,7 @@ export function App() {
       {/* Sidebar */}
       <Sidebar
         currentTab={currentTab}
-        onSelectTab={(tab) => setCurrentTab(tab)}
+        onSelectTab={navigateToTab}
         onOpenLogs={() => setLogsDrawerOpen(true)}
         onOpenBinaryModal={() => setBinaryModalOpen(true)}
         onOpenUpdateModal={() => setUpdateModalOpen(true)}
@@ -166,17 +185,20 @@ export function App() {
           onRefresh={loadAllData}
           onOpenBinaryModal={() => setBinaryModalOpen(true)}
           onOpenLogs={() => setLogsDrawerOpen(true)}
-          onOpenQuickPreset={() => setCurrentTab('presets')}
+          onOpenQuickPreset={() => navigateToTab('presets')}
           onOpenUpdateModal={() => setUpdateModalOpen(true)}
           version={binaryStatus?.version}
           updateAvailable={updateInfo?.updateAvailable || false}
           latestAppVersion={updateInfo?.latestVersion}
         />
 
-        <main className="flex-1 overflow-hidden relative">
+        <main
+          key={currentTab}
+          className={`app-route-surface flex-1 overflow-hidden relative${useCssRouteTransition ? ' app-route-surface-fallback' : ''}`}
+        >
           {currentTab === 'dashboard' && (
             <DashboardView
-              onNavigate={(tab) => setCurrentTab(tab)}
+              onNavigate={navigateToTab}
               appCount={apps.length}
               targetCount={targets.length}
               conflictCount={conflicts.length}

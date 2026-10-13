@@ -94,7 +94,7 @@ export const Sidebar: React.FC<SidebarProps> = ({
                 className={cn(
                   'w-full flex items-center justify-between px-3 py-2.5 rounded-xl text-xs font-semibold transition-all duration-150 group cursor-pointer active:scale-[0.99]',
                   isActive
-                    ? 'bg-indigo-600 text-white shadow-md shadow-indigo-600/25 font-bold'
+                    ? 'app-route-nav-current bg-indigo-600 text-white shadow-md shadow-indigo-600/25 font-bold'
                     : 'text-slate-600 hover:text-slate-900 hover:bg-slate-200/60'
                 )}
               >

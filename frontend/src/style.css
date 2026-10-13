@@ -98,6 +98,55 @@
   --wails-draggable: no-drag;
 }
 
+.app-route-surface { view-transition-name: dutix-page; }
+.app-route-title { view-transition-name: dutix-title; }
+.app-route-nav-current { view-transition-name: dutix-nav; }
+
+::view-transition-old(root),
+::view-transition-new(root) {
+  animation: none;
+}
+
+::view-transition-group(dutix-page),
+::view-transition-group(dutix-title),
+::view-transition-group(dutix-nav) {
+  animation-duration: 380ms;
+  animation-timing-function: var(--ease-spring);
+}
+
+::view-transition-old(dutix-page) {
+  animation: dutix-page-depart 140ms ease-in both;
+}
+
+::view-transition-new(dutix-page) {
+  animation: dutix-page-arrive 380ms var(--ease-spring) both;
+}
+
+@keyframes dutix-page-arrive {
+  from { opacity: 0; transform: translate3d(16px, 0, 0) scale(.992); }
+  to { opacity: 1; transform: none; }
+}
+
+@keyframes dutix-page-depart {
+  to { opacity: 0; transform: translate3d(-8px, 0, 0) scale(.996); }
+}
+
+.app-route-surface-fallback {
+  animation: dutix-page-arrive 320ms var(--ease-spring) both;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .app-route-surface-fallback { animation: none; }
+
+  ::view-transition-group(dutix-page),
+  ::view-transition-group(dutix-title),
+  ::view-transition-group(dutix-nav),
+  ::view-transition-old(dutix-page),
+  ::view-transition-new(dutix-page) {
+    animation-duration: 1ms !important;
+  }
+}
+
 @keyframes ui-fade-in {
   from { opacity: 0; }
   to { opacity: 1; }
