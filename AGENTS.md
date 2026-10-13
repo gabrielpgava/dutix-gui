@@ -167,3 +167,8 @@ make release
 - **Console de Execução em Tempo Real (Logs)**: Monitoramento completo com visualização de comandos executados, STDOUT, STDERR, tempos de execução e exportação em texto puro.
 - **Pipeline CI/CD**: Automação via GitHub Actions para compilação Universal Binary (`darwin/universal`) e publicação de pacotes `.zip` e checksums SHA256 no GitHub Releases.
 
+## 7. Commits e Pull Requests
+
+- Após concluir qualquer alteração, crie um commit Git antes de encerrar a tarefa. Faça `git add` apenas dos arquivos alterados para essa tarefa; nunca inclua mudanças preexistentes ou não relacionadas.
+- Use mensagens curtas no padrão Conventional Commits, por exemplo: `fix: corrige associação por extensão` ou `docs: atualiza guia do repositório`.
+- Em pull requests, descreva o objetivo, as mudanças e as validações executadas; inclua screenshots para mudanças visuais.
