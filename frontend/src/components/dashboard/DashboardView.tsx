@@ -38,7 +38,7 @@ export const DashboardView: React.FC<DashboardViewProps> = ({
   onQuickSetDefault
 }) => {
   return (
-    <div className="p-8 max-w-6xl mx-auto space-y-8 overflow-y-auto h-full">
+    <div className="app-page max-w-6xl mx-auto space-y-8 overflow-y-auto h-full">
       {/* Hero / Welcome macOS Surface Banner */}
       <div className="relative overflow-hidden rounded-3xl bg-gradient-to-br from-indigo-50/80 via-white to-sky-50/40 border border-indigo-100/80 p-8 backdrop-blur-xl shadow-xs">
         <div className="relative z-10 flex flex-col md:flex-row items-start md:items-center justify-between gap-6">

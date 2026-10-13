@@ -21,8 +21,8 @@ func main() {
 		Title:     "Dutix GUI",
 		Width:     1180,
 		Height:    820,
-		MinWidth:  1000,
-		MinHeight: 700,
+		MinWidth:  820,
+		MinHeight: 620,
 		AssetServer: &assetserver.Options{
 			Assets: assets,
 		},

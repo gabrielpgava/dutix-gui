@@ -89,7 +89,7 @@ export const TargetsView: React.FC<TargetsViewProps> = ({
   }
 
   return (
-    <div className="p-8 max-w-6xl mx-auto space-y-6 overflow-y-auto h-full">
+    <div className="app-page max-w-6xl mx-auto space-y-6 overflow-y-auto h-full">
       {/* Header & Tabs */}
       <div className="flex flex-col sm:flex-row gap-4 items-start sm:items-center justify-between">
         <div>
@@ -330,7 +330,8 @@ export const TargetsView: React.FC<TargetsViewProps> = ({
               </div>
 
               <div className="bg-white border border-slate-200/90 rounded-3xl overflow-hidden shadow-xs">
-                <table className="w-full text-left text-xs text-slate-800">
+                <div className="overflow-x-auto">
+                <table className="min-w-[640px] w-full text-left text-xs text-slate-800">
                   <thead className="bg-slate-50 text-[10px] uppercase tracking-wider text-slate-500 border-b border-slate-200">
                     <tr>
                       <th className="px-6 py-3 font-bold">Extensão</th>
@@ -360,6 +361,7 @@ export const TargetsView: React.FC<TargetsViewProps> = ({
                     ))}
                   </tbody>
                 </table>
+                </div>
               </div>
             </div>
           )}

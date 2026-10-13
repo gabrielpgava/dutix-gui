@@ -30,18 +30,18 @@ export const Header: React.FC<HeaderProps> = ({
   latestAppVersion
 }) => {
   return (
-    <header className="h-[84px] pt-4 border-b border-slate-200 bg-white/80 backdrop-blur-2xl px-6 flex items-center justify-between shrink-0 select-none window-drag-region shadow-xs">
+    <header className="app-header h-[84px] pt-4 border-b border-slate-200 bg-white/80 backdrop-blur-2xl px-6 flex items-center justify-between gap-4 shrink-0 select-none window-drag-region shadow-xs">
       {/* Title & info */}
-      <div className="flex flex-col window-no-drag">
-        <h1 className="app-route-title text-base font-bold text-slate-900 flex items-center gap-2 tracking-tight">
-          {title}
+      <div className="app-header-title min-w-0 flex flex-col window-no-drag">
+        <h1 className="app-route-title min-w-0 text-base font-bold text-slate-900 flex items-center gap-2 tracking-tight">
+          <span className="app-header-title-text truncate">{title}</span>
           {loading && <RefreshCw className="w-3.5 h-3.5 text-indigo-600 animate-spin" />}
         </h1>
         {subtitle && <p className="text-xs text-slate-500 font-medium">{subtitle}</p>}
       </div>
 
       {/* Action controls */}
-      <div className="flex items-center gap-2.5 window-no-drag">
+      <div className="app-header-actions flex items-center gap-2.5 shrink-0 window-no-drag">
         {updateAvailable && onOpenUpdateModal && (
           <button
             onClick={onOpenUpdateModal}
@@ -49,7 +49,7 @@ export const Header: React.FC<HeaderProps> = ({
             title="Nova versão disponível no GitHub"
           >
             <Sparkles className="w-3.5 h-3.5 text-amber-300" />
-            <span>Update v{latestAppVersion || 'novo'}</span>
+            <span className="app-header-update-label">Update v{latestAppVersion || 'novo'}</span>
           </button>
         )}
 

@@ -200,7 +200,7 @@ export const SetHandlersView: React.FC<SetHandlersViewProps> = ({
   }
 
   return (
-    <div className="p-8 max-w-5xl mx-auto space-y-8 overflow-y-auto h-full">
+    <div className="app-page max-w-5xl mx-auto space-y-8 overflow-y-auto h-full">
       {/* Header */}
       <div>
         <h2 className="text-xl font-bold text-slate-900 tracking-tight">Associação Rápida de Aplicativos</h2>

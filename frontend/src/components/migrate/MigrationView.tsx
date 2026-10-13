@@ -92,7 +92,7 @@ export const MigrationView: React.FC<MigrationViewProps> = ({
   }
 
   return (
-    <div className="p-8 max-w-5xl mx-auto space-y-8 overflow-y-auto h-full">
+    <div className="app-page max-w-5xl mx-auto space-y-8 overflow-y-auto h-full">
       {/* Header */}
       <div>
         <h2 className="text-xl font-bold text-slate-900 tracking-tight">Migração de Aplicativos</h2>
@@ -125,9 +125,9 @@ export const MigrationView: React.FC<MigrationViewProps> = ({
       )}
 
       {/* Visual Source -> Target Selectors */}
-      <div className="grid grid-cols-1 md:grid-cols-11 gap-4 items-center">
+      <div className="grid grid-cols-1 lg:grid-cols-11 gap-4 items-center">
         {/* Source App (Origem) */}
-        <div className="md:col-span-5 p-6 rounded-3xl bg-white border border-slate-200/90 space-y-4 relative shadow-xs">
+        <div className="lg:col-span-5 p-6 rounded-3xl bg-white border border-slate-200/90 space-y-4 relative shadow-xs">
           <div className="flex items-center justify-between">
             <span className="text-xs font-bold uppercase tracking-wider text-purple-700">
               Origem (De)
@@ -197,14 +197,14 @@ export const MigrationView: React.FC<MigrationViewProps> = ({
         </div>
 
         {/* Arrow Divider */}
-        <div className="md:col-span-1 flex justify-center">
+        <div className="lg:col-span-1 flex justify-center">
           <div className="w-10 h-10 rounded-full bg-slate-100 border border-slate-200 flex items-center justify-center text-indigo-600 shadow-2xs">
             <ArrowRightLeft className="w-5 h-5" />
           </div>
         </div>
 
         {/* Destination App (Destino) */}
-        <div className="md:col-span-5 p-6 rounded-3xl bg-white border border-slate-200/90 space-y-4 relative shadow-xs">
+        <div className="lg:col-span-5 p-6 rounded-3xl bg-white border border-slate-200/90 space-y-4 relative shadow-xs">
           <div className="flex items-center justify-between">
             <span className="text-xs font-bold uppercase tracking-wider text-emerald-700">
               Destino (Para)

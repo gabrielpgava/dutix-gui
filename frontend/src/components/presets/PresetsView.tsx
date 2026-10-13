@@ -166,7 +166,7 @@ export const PresetsView: React.FC<PresetsViewProps> = ({
   }
 
   return (
-    <div className="p-8 max-w-6xl mx-auto space-y-8 overflow-y-auto h-full">
+    <div className="app-page max-w-6xl mx-auto space-y-8 overflow-y-auto h-full">
       {/* Header */}
       <div className="flex flex-col sm:flex-row gap-4 items-start sm:items-center justify-between">
         <div>
