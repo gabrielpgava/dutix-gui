@@ -98,6 +98,32 @@
   --wails-draggable: no-drag;
 }
 
+@keyframes ui-fade-in {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+
+@keyframes drawer-enter {
+  from { opacity: 0; transform: translateX(16px); }
+  to { opacity: 1; transform: translateX(0); }
+}
+
+.animate-in {
+  animation-duration: 200ms;
+  animation-fill-mode: both;
+  animation-timing-function: var(--ease-spring);
+}
+
+.animate-in.fade-in { animation-name: ui-fade-in; }
+.animate-in.slide-in-from-right { animation-name: drawer-enter; }
+.animate-in.duration-150 { animation-duration: 150ms; }
+.animate-in.duration-200 { animation-duration: 200ms; }
+
+@media (prefers-reduced-motion: reduce) {
+  .animate-in { animation-duration: 100ms !important; }
+  .animate-in.slide-in-from-right { animation-name: ui-fade-in; }
+}
+
 /* Apple-grade spring transition utility */
 .transition-spring {
   transition-timing-function: cubic-bezier(0.16, 1, 0.3, 1);
