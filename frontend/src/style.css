@@ -22,7 +22,7 @@
     /* Typography */
     --color-text-primary: #0f172a;
     --color-text-secondary: #334155;
-    --color-text-muted: #64748b;
+    --color-text-muted: #475569;
     --color-text-dim: #94a3b8;
 
     /* Accents */
@@ -32,15 +32,15 @@
     --color-accent-primary-glow: rgba(99, 102, 241, 0.2);
 
     /* Semantic Status */
-    --color-success: #10b981;
+    --color-success: #047857;
     --color-success-subtle: rgba(16, 185, 129, 0.12);
     --color-success-border: rgba(16, 185, 129, 0.25);
 
-    --color-warning: #f59e0b;
+    --color-warning: #b45309;
     --color-warning-subtle: rgba(245, 158, 11, 0.12);
     --color-warning-border: rgba(245, 158, 11, 0.25);
 
-    --color-danger: #ef4444;
+    --color-danger: #be123c;
     --color-danger-subtle: rgba(239, 68, 68, 0.12);
     --color-danger-border: rgba(239, 68, 68, 0.25);
 
@@ -295,3 +295,10 @@
   }
 }
 
+
+@theme {
+  --color-slate-500: var(--color-text-muted);
+  --color-emerald-600: var(--color-success);
+  --color-amber-600: var(--color-warning);
+  --color-rose-600: var(--color-danger);
+}
