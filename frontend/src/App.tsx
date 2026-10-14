@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useCallback } from 'react'
+import React, { useState, useEffect, useLayoutEffect, useCallback, useRef } from 'react'
 import { Sidebar, NavTab } from './components/layout/Sidebar'
 import { Header } from './components/layout/Header'
 import { DashboardView } from './components/dashboard/DashboardView'
@@ -39,6 +39,8 @@ export function App() {
   const [updateModalOpen, setUpdateModalOpen] = useState(false)
 
   const [loading, setLoading] = useState(false)
+  const routeFocusPending = useRef(false)
+  const mainContentRef = useRef<HTMLElement | null>(null)
   const [binaryModalOpen, setBinaryModalOpen] = useState(false)
   const [logsDrawerOpen, setLogsDrawerOpen] = useState(false)
 
@@ -100,8 +102,15 @@ export function App() {
     loadAllData()
   }, [loadAllData])
 
+  useLayoutEffect(() => {
+    if (!routeFocusPending.current) return
+    routeFocusPending.current = false
+    mainContentRef.current?.focus()
+  }, [currentTab])
+
   const navigateToTab = (tab: NavTab) => {
     if (tab === currentTab) return
+    routeFocusPending.current = true
 
     const reduceMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches
     const transitionDocument = document as Document & {
@@ -193,6 +202,9 @@ export function App() {
         />
 
         <main
+          ref={mainContentRef}
+          tabIndex={-1}
+          aria-label={getTabTitle(currentTab)}
           key={currentTab}
           className={`app-route-surface flex-1 overflow-hidden relative${useCssRouteTransition ? ' app-route-surface-fallback' : ''}`}
         >

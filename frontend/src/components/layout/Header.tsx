@@ -32,11 +32,16 @@ export const Header: React.FC<HeaderProps> = ({
   return (
     <header className="app-header h-[84px] pt-4 border-b border-slate-200 bg-white/80 backdrop-blur-2xl px-6 flex items-center justify-between gap-4 shrink-0 select-none window-drag-region shadow-xs">
       {/* Title & info */}
-      <div className="app-header-title min-w-0 flex flex-col window-no-drag">
+      <div className="app-header-title min-w-0 flex items-center gap-2 window-no-drag">
         <h1 className="app-route-title min-w-0 text-base font-bold text-slate-900 flex items-center gap-2 tracking-tight">
           <span className="app-header-title-text truncate">{title}</span>
-          {loading && <RefreshCw className="w-3.5 h-3.5 text-indigo-600 animate-spin" />}
         </h1>
+        {loading && (
+          <span role="status" className="flex shrink-0 items-center gap-1 text-[10px] font-medium text-brand-700">
+            <RefreshCw aria-hidden="true" className="w-3.5 h-3.5 animate-spin" />
+            Atualizando
+          </span>
+        )}
         {subtitle && <p className="text-xs text-slate-500 font-medium">{subtitle}</p>}
       </div>
 
