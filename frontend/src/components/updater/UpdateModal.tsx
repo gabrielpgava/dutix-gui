@@ -17,6 +17,7 @@ import {
 } from '../../../wailsjs/go/main/App'
 import { autoupdate } from '../../../wailsjs/go/models'
 import { EventsOn, EventsOff } from '../../../wailsjs/runtime/runtime'
+import { useAccessibleDialog } from '../../utils/useAccessibleDialog'
 
 interface UpdateModalProps {
   isOpen: boolean
@@ -110,25 +111,36 @@ export const UpdateModal: React.FC<UpdateModalProps> = ({
     }
   }
 
+  const dialogRef = useAccessibleDialog(isOpen, onClose)
+
   if (!isOpen) return null
 
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 backdrop-blur-md p-4 animate-in fade-in duration-200">
-      <div className="bg-white border border-slate-200 rounded-3xl w-full max-w-xl shadow-2xl overflow-hidden flex flex-col max-h-[90vh]">
+      <div
+        ref={dialogRef}
+        role="dialog"
+        aria-modal="true"
+        aria-labelledby="update-dialog-title"
+        tabIndex={-1}
+        className="bg-white border border-slate-200 rounded-3xl w-full max-w-xl shadow-2xl overflow-hidden flex flex-col max-h-[90vh]"
+      >
         {/* Modal Header */}
         <div className="px-6 py-4 border-b border-slate-200 flex items-center justify-between bg-slate-50/80">
           <div className="flex items-center gap-3">
-            <div className="w-9 h-9 rounded-xl bg-indigo-50 border border-indigo-200 flex items-center justify-center text-indigo-700 shadow-2xs">
+            <div className="w-9 h-9 rounded-xl bg-brand-50 border border-brand-200 flex items-center justify-center text-brand-700 shadow-2xs">
               <Sparkles className="w-5 h-5" />
             </div>
             <div>
-              <h2 className="text-base font-bold text-slate-900">Atualização do Dutix GUI</h2>
-              <p className="text-xs text-slate-500 font-medium">Mantenha a interface gráfica sempre atualizada com as novidades do GitHub</p>
+              <h2 id="update-dialog-title" className="text-base font-bold text-slate-900">Atualização do Dutix GUI</h2>
+              <p className="text-xs text-slate-500 font-medium">Veja as novidades e atualize o Dutix GUI.</p>
             </div>
           </div>
           <button
+            type="button"
             onClick={onClose}
-            className="text-slate-400 hover:text-slate-700 p-1.5 rounded-lg hover:bg-slate-100 transition-colors cursor-pointer"
+            aria-label="Fechar atualização do Dutix GUI"
+            className="text-slate-500 hover:text-slate-700 p-1.5 rounded-lg hover:bg-slate-100 transition-colors cursor-pointer"
           >
             <X className="w-5 h-5" />
           </button>
@@ -137,7 +149,7 @@ export const UpdateModal: React.FC<UpdateModalProps> = ({
         {/* Modal Body */}
         <div className="p-6 overflow-y-auto space-y-5 text-xs text-slate-700">
           {/* Version comparison banner */}
-          <div className="p-4 rounded-2xl bg-gradient-to-r from-indigo-50 via-slate-50 to-indigo-50/60 border border-indigo-100 shadow-2xs space-y-3">
+          <div className="p-4 rounded-2xl bg-slate-50 border border-slate-200 space-y-3">
             <div className="flex items-center justify-between">
               <div className="flex items-center gap-2">
                 <span className="text-[11px] font-bold text-slate-500 uppercase tracking-wider">Versão Atual:</span>
@@ -148,9 +160,9 @@ export const UpdateModal: React.FC<UpdateModalProps> = ({
 
               {updateInfo?.updateAvailable ? (
                 <div className="flex items-center gap-2">
-                  <ArrowRight className="w-4 h-4 text-indigo-500" />
-                  <span className="text-[11px] font-bold text-indigo-600 uppercase tracking-wider">Nova Versão:</span>
-                  <span className="font-mono font-bold text-indigo-700 bg-indigo-100/80 px-2.5 py-0.5 rounded-lg border border-indigo-300 text-xs shadow-2xs">
+                  <ArrowRight className="w-4 h-4 text-brand-500" />
+                  <span className="text-[11px] font-bold text-brand-600 uppercase tracking-wider">Nova Versão:</span>
+                  <span className="font-mono font-bold text-brand-700 bg-brand-100/80 px-2.5 py-0.5 rounded-lg border border-brand-300 text-xs shadow-2xs">
                     v{updateInfo?.latestVersion}
                   </span>
                 </div>
@@ -172,13 +184,13 @@ export const UpdateModal: React.FC<UpdateModalProps> = ({
           {updateInfo?.releaseNotes && (
             <div className="space-y-2">
               <div className="flex items-center justify-between">
-                <h3 className="font-bold text-slate-900 text-xs uppercase tracking-wider">Novidades & Notas da Release</h3>
+                <h3 className="font-bold text-slate-900 text-xs uppercase tracking-wider">Notas da versão</h3>
                 {updateInfo.releaseUrl && (
                   <a
                     href={updateInfo.releaseUrl}
                     target="_blank"
                     rel="noreferrer"
-                    className="text-[11px] text-indigo-600 hover:text-indigo-800 font-semibold flex items-center gap-1 hover:underline"
+                    className="text-[11px] text-brand-600 hover:text-brand-800 font-semibold flex items-center gap-1 hover:underline"
                   >
                     Ver no GitHub <ExternalLink className="w-3 h-3" />
                   </a>
@@ -192,14 +204,14 @@ export const UpdateModal: React.FC<UpdateModalProps> = ({
 
           {/* Download Progress */}
           {downloading && (
-            <div className="p-4 rounded-2xl bg-indigo-50/70 border border-indigo-200 space-y-2 shadow-2xs">
-              <div className="flex justify-between text-[11px] font-semibold text-indigo-900">
+            <div className="p-4 rounded-2xl bg-brand-50/70 border border-brand-200 space-y-2 shadow-2xs">
+              <div className="flex justify-between text-[11px] font-semibold text-brand-900">
                 <span>{progress.message}</span>
                 <span className="font-mono font-bold">{Math.round(progress.percent)}%</span>
               </div>
-              <div className="w-full h-2.5 bg-indigo-200/80 rounded-full overflow-hidden">
+              <div className="w-full h-2.5 bg-brand-200/80 rounded-full overflow-hidden">
                 <div
-                  className="h-full bg-indigo-600 rounded-full transition-all duration-300 shadow-2xs"
+                  className="h-full bg-brand-600 rounded-full transition-all duration-300 shadow-2xs"
                   style={{ width: `${progress.percent}%` }}
                 />
               </div>
@@ -254,7 +266,7 @@ export const UpdateModal: React.FC<UpdateModalProps> = ({
               <button
                 onClick={handleStartDownload}
                 disabled={downloading}
-                className="flex items-center gap-1.5 px-4 py-2 rounded-xl bg-indigo-600 hover:bg-indigo-700 text-white text-xs font-bold transition-all shadow-md shadow-indigo-600/20 cursor-pointer active:scale-[0.97] disabled:opacity-50"
+                className="flex items-center gap-1.5 px-4 py-2 rounded-xl bg-brand-600 hover:bg-brand-700 text-white text-xs font-bold transition-all shadow-md shadow-brand-600/20 cursor-pointer active:scale-[0.97] disabled:opacity-50"
               >
                 <DownloadCloud className="w-4 h-4" />
                 <span>{downloading ? 'Baixando...' : 'Atualizar Agora'}</span>

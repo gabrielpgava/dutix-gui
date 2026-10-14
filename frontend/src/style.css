@@ -1,5 +1,19 @@
 @import "tailwindcss";
 
+@theme {
+  --color-brand-50: #ecfeff;
+  --color-brand-100: #cffafe;
+  --color-brand-200: #a5f3fc;
+  --color-brand-300: #67e8f9;
+  --color-brand-400: #22d3ee;
+  --color-brand-500: #06b6d4;
+  --color-brand-600: #0e7490;
+  --color-brand-700: #155e75;
+  --color-brand-800: #164e63;
+  --color-brand-900: #083344;
+  --color-brand-950: #042f2e;
+}
+
 @layer base {
   :root {
     --app-region: drag;
@@ -18,8 +32,8 @@
     /* Borders & Layer Separation */
     --color-border-subtle: rgba(148, 163, 184, 0.2);
     --color-border-default: rgba(148, 163, 184, 0.35);
-    --color-border-hover: rgba(99, 102, 241, 0.4);
-    --color-border-focus: #6366f1;
+    --color-border-hover: rgba(14, 116, 144, 0.4);
+    --color-border-focus: #0e7490;
 
     /* Typography */
     --color-text-primary: #0f172a;
@@ -28,10 +42,10 @@
     --color-text-dim: #94a3b8;
 
     /* Accents */
-    --color-accent-primary: #4f46e5;
-    --color-accent-primary-hover: #4338ca;
-    --color-accent-primary-subtle: rgba(99, 102, 241, 0.1);
-    --color-accent-primary-glow: rgba(99, 102, 241, 0.2);
+    --color-accent-primary: #0e7490;
+    --color-accent-primary-hover: #155e75;
+    --color-accent-primary-subtle: rgba(14, 116, 144, 0.1);
+    --color-accent-primary-glow: rgba(14, 116, 144, 0.2);
 
     /* Semantic Status */
     --color-success: #047857;
@@ -52,7 +66,7 @@
     /* Shadows */
     --shadow-card-subtle: 0 1px 3px 0 rgba(0, 0, 0, 0.06), 0 1px 2px -1px rgba(0, 0, 0, 0.06);
     --shadow-card-elevated: 0 10px 25px -5px rgba(0, 0, 0, 0.08), 0 8px 10px -6px rgba(0, 0, 0, 0.04);
-    --shadow-glow-primary: 0 0 20px -2px rgba(99, 102, 241, 0.25);
+    --shadow-glow-primary: 0 0 20px -2px rgba(14, 116, 144, 0.25);
   }
 
   body {
@@ -67,7 +81,9 @@
 
   /* Accessible focus rings */
   button:focus-visible,
+  a[href]:focus-visible,
   input:focus-visible,
+  textarea:focus-visible,
   select:focus-visible,
   [tabindex]:focus-visible {
     outline: none;
@@ -169,6 +185,15 @@ textarea {
   to { opacity: 1; transform: translateX(0); }
 }
 
+@keyframes dialog-enter {
+  from { opacity: 0; transform: translate3d(0, 6px, 0) scale(.985); }
+  to { opacity: 1; transform: none; }
+}
+
+.animate-in > [role="dialog"] {
+  animation: dialog-enter 180ms var(--ease-spring) both;
+}
+
 .animate-in {
   animation-duration: 200ms;
   animation-fill-mode: both;
@@ -181,8 +206,14 @@ textarea {
 .animate-in.duration-200 { animation-duration: 200ms; }
 
 @media (prefers-reduced-motion: reduce) {
-  .animate-in { animation-duration: 100ms !important; }
-  .animate-in.slide-in-from-right { animation-name: ui-fade-in; }
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    scroll-behavior: auto !important;
+    transition-duration: 0.01ms !important;
+  }
 }
 
 /* Apple-grade spring transition utility */
@@ -207,6 +238,7 @@ textarea {
   -webkit-backdrop-filter: blur(28px);
   box-shadow: var(--shadow-card-elevated);
 }
+
 .app-page {
   padding: 1rem;
 }
@@ -306,7 +338,6 @@ textarea {
     max-width: 9rem;
   }
 }
-
 
 @theme {
   --color-slate-50: var(--color-canvas);

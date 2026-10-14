@@ -8,8 +8,7 @@ import {
   BookmarkPlus,
   History,
   Terminal,
-  Cpu,
-  AlertTriangle
+  Cpu
 } from 'lucide-react'
 import { cn } from '../../utils/cn'
 
@@ -27,12 +26,8 @@ interface SidebarProps {
   onSelectTab: (tab: NavTab) => void
   onOpenLogs: () => void
   onOpenBinaryModal: () => void
-  onOpenUpdateModal?: () => void
-  binaryInstalled: boolean
-  conflictCount: number
-  appVersion?: string
-  updateAvailable?: boolean
-  latestAppVersion?: string
+  binaryInstalled: boolean | null
+  conflictCount: number | null
 }
 
 export const Sidebar: React.FC<SidebarProps> = ({
@@ -40,12 +35,8 @@ export const Sidebar: React.FC<SidebarProps> = ({
   onSelectTab,
   onOpenLogs,
   onOpenBinaryModal,
-  onOpenUpdateModal,
   binaryInstalled,
-  conflictCount,
-  appVersion,
-  updateAvailable,
-  latestAppVersion
+  conflictCount
 }) => {
   const navItems = [
     { id: 'dashboard' as NavTab, label: 'Painel Geral', icon: LayoutDashboard },
@@ -56,7 +47,7 @@ export const Sidebar: React.FC<SidebarProps> = ({
       id: 'targets' as NavTab, 
       label: 'Inspetor & Diagnóstico', 
       icon: SearchCode, 
-      badge: conflictCount > 0 ? conflictCount : undefined,
+      badge: conflictCount !== null && conflictCount > 0 ? conflictCount : undefined,
       badgeColor: 'bg-amber-100 text-amber-800 border-amber-300 shadow-sm'
     },
     { id: 'presets' as NavTab, label: 'Presets & Dotfiles', icon: BookmarkPlus },
@@ -69,13 +60,13 @@ export const Sidebar: React.FC<SidebarProps> = ({
       <div>
         {/* Top titlebar / drag region for macOS traffic lights */}
         <div className="app-sidebar-brand h-[84px] pt-9 px-4 pb-3 flex items-center gap-3 border-b border-slate-200/80 window-drag-region">
-          <div className="w-9 h-9 rounded-xl overflow-hidden shadow-md shadow-indigo-500/10 border border-slate-200 shrink-0 bg-white window-no-drag">
+          <div className="w-9 h-9 rounded-xl overflow-hidden shadow-md shadow-brand-500/10 border border-slate-200 shrink-0 bg-white window-no-drag">
             <img src="/appicon.png" alt="Dutix Logo" className="w-full h-full object-cover select-none pointer-events-none" />
           </div>
           <div className="app-sidebar-brand-copy window-no-drag min-w-0 flex-1">
             <div className="font-bold text-sm tracking-tight text-slate-900 flex items-center gap-1.5">
               <span className="truncate">Dutix GUI</span>
-              <span className="text-[9px] uppercase font-mono px-1.5 py-0.5 rounded bg-indigo-50 text-indigo-700 border border-indigo-200 font-bold tracking-wider shrink-0 shadow-sm">macOS</span>
+              <span className="text-[9px] uppercase font-mono px-1.5 py-0.5 rounded bg-brand-50 text-brand-700 border border-brand-200 font-bold tracking-wider shrink-0 shadow-sm">macOS</span>
             </div>
             <p className="text-xs text-slate-500 font-medium truncate">Gestor de Associações</p>
           </div>
@@ -89,8 +80,8 @@ export const Sidebar: React.FC<SidebarProps> = ({
 
             return (
               <button
-                key={item.id}
                 type="button"
+                key={item.id}
                 onClick={() => onSelectTab(item.id)}
                 aria-current={isActive ? 'page' : undefined}
                 aria-label={item.label}
@@ -98,12 +89,12 @@ export const Sidebar: React.FC<SidebarProps> = ({
                 className={cn(
                   'app-sidebar-link w-full flex items-center justify-between px-3 py-2.5 rounded-xl text-xs font-semibold transition-all duration-150 group cursor-pointer active:scale-[0.99]',
                   isActive
-                    ? 'app-route-nav-current bg-indigo-600 text-white shadow-md shadow-indigo-600/25 font-bold'
+                    ? 'app-route-nav-current bg-brand-600 text-white shadow-md shadow-brand-600/25 font-bold'
                     : 'text-slate-600 hover:text-slate-900 hover:bg-slate-200/60'
                 )}
               >
                 <div className="app-sidebar-link-content flex items-center gap-2.5">
-                  <Icon className={cn('w-4 h-4 transition-colors', isActive ? 'text-white' : 'text-slate-400 group-hover:text-indigo-600')} />
+                  <Icon className={cn('w-4 h-4 transition-colors', isActive ? 'text-white' : 'text-slate-500 group-hover:text-brand-600')} />
                   <span className="app-sidebar-label">{item.label}</span>
                 </div>
                 {item.badge !== undefined && (
@@ -119,31 +110,17 @@ export const Sidebar: React.FC<SidebarProps> = ({
 
       {/* Bottom status & action buttons */}
       <div className="app-sidebar-footer p-3 border-t border-slate-200 space-y-2 bg-slate-100/60">
-        {/* Update available indicator banner */}
-        {updateAvailable && onOpenUpdateModal && (
-          <button
-            onClick={onOpenUpdateModal}
-            className="w-full flex items-center justify-between p-2.5 rounded-xl border border-indigo-300 bg-gradient-to-r from-indigo-500 to-indigo-600 text-white text-xs font-bold transition-all cursor-pointer active:scale-[0.99] shadow-md shadow-indigo-500/20 hover:from-indigo-600 hover:to-indigo-700 animate-pulse"
-          >
-            <div className="flex items-center gap-2">
-              <Sparkles className="w-3.5 h-3.5 text-amber-300" />
-              <span>Update v{latestAppVersion || 'novo'}</span>
-            </div>
-            <span className="text-[10px] bg-white/20 px-2 py-0.5 rounded-full font-mono font-bold">
-              Atualizar
-            </span>
-          </button>
-        )}
-
         {/* Binary status indicator */}
         <button
           onClick={onOpenBinaryModal}
           type="button"
-          aria-label={binaryInstalled ? 'Binário dutix: pronto' : 'Binário dutix: ausente'}
-          title={binaryInstalled ? 'Binário dutix: pronto' : 'Binário dutix: ausente'}
+          aria-label={binaryInstalled === null ? 'Status do binário dutix indisponível' : binaryInstalled ? 'Binário dutix: pronto' : 'Binário dutix: ausente'}
+          title={binaryInstalled === null ? 'Status do binário dutix indisponível' : binaryInstalled ? 'Binário dutix: pronto' : 'Binário dutix: ausente'}
           className={cn(
             'app-sidebar-footer-action w-full flex items-center justify-between p-2.5 rounded-xl border text-xs font-semibold transition-all cursor-pointer active:scale-[0.99]',
-            binaryInstalled
+            binaryInstalled === null
+              ? 'bg-slate-100 border-slate-200 text-slate-700 shadow-sm'
+              : binaryInstalled
               ? 'bg-emerald-50 border-emerald-200 text-emerald-800 hover:bg-emerald-100 shadow-sm'
               : 'bg-rose-50 border-rose-200 text-rose-800 hover:bg-rose-100 shadow-sm'
           )}
@@ -153,33 +130,20 @@ export const Sidebar: React.FC<SidebarProps> = ({
             <span className="app-sidebar-label">Binário dutix</span>
           </div>
           <span className="app-sidebar-label font-mono text-[11px] font-bold">
-            {binaryInstalled ? 'Pronto' : 'Ausente'}
+            {binaryInstalled === null ? 'Indisponível' : binaryInstalled ? 'Pronto' : 'Ausente'}
           </span>
         </button>
 
-        {/* Logs Drawer Trigger & App Version */}
-        <div className="flex items-center gap-2">
-          <button
-            onClick={onOpenLogs}
-            type="button"
-            aria-label="Abrir Console de Logs"
-            title="Abrir Console de Logs"
-            className="app-sidebar-footer-action flex-1 flex items-center gap-2 px-3 py-2 rounded-xl text-xs font-semibold text-slate-600 hover:text-slate-900 hover:bg-slate-200/70 transition-colors border border-slate-200 cursor-pointer active:scale-[0.99] bg-white shadow-xs"
-          >
-            <Terminal className="w-3.5 h-3.5 text-indigo-600" />
-            <span className="app-sidebar-label">Logs</span>
-          </button>
-
-          {onOpenUpdateModal && (
-            <button
-              onClick={onOpenUpdateModal}
-              className="px-2.5 py-2 rounded-xl text-[11px] font-mono font-bold text-slate-600 hover:text-indigo-600 hover:bg-slate-200/70 transition-colors border border-slate-200 cursor-pointer active:scale-[0.99] bg-white shadow-xs"
-              title="Verificar atualizações do Dutix GUI"
-            >
-              v{appVersion || '1.0.1'}
-            </button>
-          )}
-        </div>
+        <button
+          onClick={onOpenLogs}
+          type="button"
+          aria-label="Logs de execução"
+          title="Logs de execução"
+          className="app-sidebar-footer-action w-full flex items-center gap-2 px-3 py-2 rounded-xl text-xs font-semibold text-slate-600 hover:text-slate-900 hover:bg-slate-200/70 transition-colors border border-slate-200 cursor-pointer active:scale-[0.99] bg-white"
+        >
+          <Terminal className="w-3.5 h-3.5 text-brand-600" />
+          <span className="app-sidebar-label">Logs de execução</span>
+        </button>
       </div>
     </aside>
   )

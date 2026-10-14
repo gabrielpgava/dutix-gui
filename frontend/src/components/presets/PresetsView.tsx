@@ -6,7 +6,7 @@ import {
   Palette,
   Film,
   Apple,
-  Play,
+  Eye,
   Upload,
   Download,
   Trash2,
@@ -14,12 +14,11 @@ import {
   CheckCircle2,
   AlertCircle,
   X,
-  FileJson,
-  Layers
 } from 'lucide-react'
-import { presets } from '../../../wailsjs/go/models'
+import { dutix, presets } from '../../../wailsjs/go/models'
+import { DryRunPreviewModal } from '../set/DryRunPreviewModal'
+import { useAccessibleDialog } from '../../utils/useAccessibleDialog'
 import {
-  ListPresets,
   ApplyPreset,
   SavePreset,
   DeletePreset,
@@ -30,15 +29,19 @@ import {
 interface PresetsViewProps {
   presetsList: presets.Preset[]
   loading: boolean
+  loadFailed: boolean
   onRefresh: () => void
 }
 
 export const PresetsView: React.FC<PresetsViewProps> = ({
   presetsList,
   loading,
+  loadFailed,
   onRefresh
 }) => {
   const [applyingId, setApplyingId] = useState<string | null>(null)
+  const [previewingPreset, setPreviewingPreset] = useState<presets.Preset | null>(null)
+  const [dryRunResult, setDryRunResult] = useState<dutix.DryRunResult | null>(null)
   const [alert, setAlert] = useState<{ type: 'success' | 'error'; message: string } | null>(null)
 
   // New Preset Modal
@@ -56,6 +59,10 @@ export const PresetsView: React.FC<PresetsViewProps> = ({
   // Export Modal
   const [exportModalPreset, setExportModalPreset] = useState<presets.Preset | null>(null)
   const [exportedJson, setExportedJson] = useState('')
+  const [exportCopyError, setExportCopyError] = useState('')
+  const exportDialogRef = useAccessibleDialog(Boolean(exportModalPreset), () => setExportModalPreset(null))
+  const importDialogRef = useAccessibleDialog(isImportModalOpen, () => setIsImportModalOpen(false))
+  const createDialogRef = useAccessibleDialog(isNewModalOpen, () => setIsNewModalOpen(false))
 
   const getPresetIcon = (iconName: string) => {
     switch (iconName) {
@@ -72,16 +79,51 @@ export const PresetsView: React.FC<PresetsViewProps> = ({
     }
   }
 
-  const handleApply = async (preset: presets.Preset) => {
+  const handlePreview = async (preset: presets.Preset) => {
     setApplyingId(preset.id)
     setAlert(null)
 
     try {
-      await ApplyPreset(preset, false)
+      const results = await ApplyPreset(preset, true)
+      if (results.length === 0) {
+        setAlert({ type: 'error', message: 'Este preset não contém associações para revisar.' })
+        return
+      }
+
+      setDryRunResult(dutix.DryRunResult.createFrom({
+        header: `Prévia do preset ${preset.name}`,
+        items: results.flatMap((result) => result.items || []),
+        warnings: results.flatMap((result) => result.warnings || []),
+        stats: results.reduce((total, result) => ({
+          pending: total.pending + (result.stats?.pending || 0),
+          success: total.success + (result.stats?.success || 0),
+          failed: total.failed + (result.stats?.failed || 0),
+          skipped: total.skipped + (result.stats?.skipped || 0)
+        }), { pending: 0, success: 0, failed: 0, skipped: 0 }),
+        raw: results.map((result) => result.raw).filter(Boolean).join('\n'),
+        success: results.every((result) => result.success)
+      }))
+      setPreviewingPreset(preset)
+    } catch (e: any) {
+      setAlert({ type: 'error', message: e?.message || 'Falha ao simular preset.' })
+    } finally {
+      setApplyingId(null)
+    }
+  }
+
+  const handleApply = async () => {
+    if (!previewingPreset) return
+    setApplyingId(previewingPreset.id)
+    setAlert(null)
+
+    try {
+      await ApplyPreset(previewingPreset, false)
       setAlert({
         type: 'success',
-        message: `Preset '${preset.name}' aplicado com sucesso! Um snapshot de segurança foi criado.`
+        message: `Preset '${previewingPreset.name}' aplicado com sucesso.`
       })
+      setPreviewingPreset(null)
+      setDryRunResult(null)
       onRefresh()
     } catch (e: any) {
       setAlert({ type: 'error', message: e?.message || 'Falha ao aplicar preset.' })
@@ -91,12 +133,23 @@ export const PresetsView: React.FC<PresetsViewProps> = ({
   }
 
   const handleExport = async (preset: presets.Preset) => {
+    setExportCopyError('')
     try {
       const json = await ExportPresetJSON(preset)
       setExportedJson(json)
       setExportModalPreset(preset)
     } catch (e: any) {
       setAlert({ type: 'error', message: 'Falha ao exportar preset.' })
+    }
+  }
+
+  const handleCopyExport = async () => {
+    try {
+      await navigator.clipboard.writeText(exportedJson)
+      setAlert({ type: 'success', message: 'JSON copiado para a área de transferência!' })
+      setExportModalPreset(null)
+    } catch {
+      setExportCopyError('Não foi possível copiar o JSON. Selecione e copie o texto manualmente.')
     }
   }
 
@@ -181,13 +234,13 @@ export const PresetsView: React.FC<PresetsViewProps> = ({
             onClick={() => setIsImportModalOpen(true)}
             className="flex items-center gap-1.5 px-3.5 py-2 rounded-xl bg-white hover:bg-slate-50 text-slate-700 border border-slate-200 text-xs font-bold transition-colors cursor-pointer active:scale-[0.98] shadow-2xs"
           >
-            <Upload className="w-3.5 h-3.5 text-indigo-600" />
+            <Upload className="w-3.5 h-3.5 text-brand-600" />
             <span>Importar JSON</span>
           </button>
 
           <button
             onClick={() => setIsNewModalOpen(true)}
-            className="flex items-center gap-1.5 px-4 py-2 rounded-xl bg-indigo-600 hover:bg-indigo-700 text-white text-xs font-bold transition-all shadow-md shadow-indigo-600/20 cursor-pointer active:scale-[0.98]"
+            className="flex items-center gap-1.5 px-4 py-2 rounded-xl bg-brand-600 hover:bg-brand-700 text-white text-xs font-bold transition-all shadow-md shadow-brand-600/20 cursor-pointer active:scale-[0.98]"
           >
             <Plus className="w-3.5 h-3.5" />
             <span>Criar Preset</span>
@@ -198,6 +251,8 @@ export const PresetsView: React.FC<PresetsViewProps> = ({
       {/* Alert Banner */}
       {alert && (
         <div
+          role={alert.type === 'error' ? 'alert' : 'status'}
+          aria-atomic="true"
           className={`p-4 rounded-2xl border text-xs flex items-center justify-between font-medium ${
             alert.type === 'success'
               ? 'bg-emerald-50 border-emerald-200 text-emerald-800'
@@ -212,13 +267,26 @@ export const PresetsView: React.FC<PresetsViewProps> = ({
             )}
             <span>{alert.message}</span>
           </div>
-          <button onClick={() => setAlert(null)} className="text-slate-500 hover:text-slate-800 cursor-pointer">
-            <X className="w-4 h-4" />
+          <button type="button" onClick={() => setAlert(null)} aria-label="Fechar aviso" className="text-slate-500 hover:text-slate-800 cursor-pointer">
+            <X className="w-4 h-4" aria-hidden="true" />
           </button>
         </div>
       )}
 
       {/* Presets Grid */}
+      {loading && presetsList.length === 0 ? (
+        <div className="p-10 text-center bg-white rounded-2xl border border-slate-200 text-sm text-slate-500">
+          Carregando presets...
+        </div>
+      ) : loadFailed && presetsList.length === 0 ? (
+        <div role="status" className="p-10 text-center bg-white rounded-2xl border border-slate-200 text-sm text-rose-800">
+          Não foi possível carregar os presets. Tente atualizar os dados.
+        </div>
+      ) : presetsList.length === 0 ? (
+        <div className="p-10 text-center bg-white rounded-2xl border border-slate-200 text-sm text-slate-500">
+          Nenhum preset disponível. Crie um perfil ou importe um arquivo JSON.
+        </div>
+      ) : (
       <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
         {presetsList.map((p) => {
           const Icon = getPresetIcon(p.icon)
@@ -227,19 +295,19 @@ export const PresetsView: React.FC<PresetsViewProps> = ({
           return (
             <div
               key={p.id}
-              className="p-6 rounded-3xl bg-white border border-slate-200/90 hover:border-indigo-400 hover:shadow-md transition-all flex flex-col justify-between space-y-4 relative shadow-xs"
+              className="p-6 rounded-3xl bg-white border border-slate-200/90 hover:border-brand-400 hover:shadow-md transition-all flex flex-col justify-between space-y-4 relative shadow-xs"
             >
               {/* Header */}
               <div className="flex items-start justify-between">
                 <div className="flex items-center gap-3">
-                  <div className="w-12 h-12 rounded-2xl bg-indigo-50 border border-indigo-200 flex items-center justify-center text-indigo-700 shadow-2xs">
+                  <div className="w-12 h-12 rounded-2xl bg-brand-50 border border-brand-200 flex items-center justify-center text-brand-700 shadow-2xs">
                     <Icon className="w-6 h-6" />
                   </div>
                   <div>
                     <div className="flex items-center gap-2">
                       <h3 className="text-base font-bold text-slate-900">{p.name}</h3>
                       {p.is_builtin ? (
-                        <span className="px-2 py-0.5 rounded-full text-[9px] font-bold uppercase bg-indigo-50 text-indigo-700 border border-indigo-200">
+                        <span className="px-2 py-0.5 rounded-full text-[9px] font-bold uppercase bg-brand-50 text-brand-700 border border-brand-200">
                           Oficial
                         </span>
                       ) : (
@@ -255,7 +323,7 @@ export const PresetsView: React.FC<PresetsViewProps> = ({
                 <div className="flex items-center gap-1">
                   <button
                     onClick={() => handleExport(p)}
-                    className="p-1.5 rounded-lg text-slate-400 hover:text-slate-700 hover:bg-slate-100 transition-colors cursor-pointer"
+                    className="p-1.5 rounded-lg text-slate-500 hover:text-slate-700 hover:bg-slate-100 transition-colors cursor-pointer"
                     title="Exportar JSON"
                   >
                     <Download className="w-4 h-4" />
@@ -263,7 +331,7 @@ export const PresetsView: React.FC<PresetsViewProps> = ({
                   {!p.is_builtin && (
                     <button
                       onClick={() => handleDelete(p.id)}
-                      className="p-1.5 rounded-lg text-slate-400 hover:text-rose-600 hover:bg-rose-50 transition-colors cursor-pointer"
+                      className="p-1.5 rounded-lg text-slate-500 hover:text-rose-600 hover:bg-rose-50 transition-colors cursor-pointer"
                       title="Excluir preset"
                     >
                       <Trash2 className="w-4 h-4" />
@@ -283,7 +351,7 @@ export const PresetsView: React.FC<PresetsViewProps> = ({
                 <div className="space-y-1.5">
                   {p.mappings?.map((m, idx) => (
                     <div key={idx} className="flex items-center justify-between text-xs font-mono">
-                      <span className="text-indigo-700 font-bold truncate max-w-xs">{m.app_name}</span>
+                      <span className="text-brand-700 font-bold truncate max-w-xs">{m.app_name}</span>
                       <span className="text-[10px] text-slate-500 font-medium">
                         {m.extensions?.length ? `${m.extensions.length} extensões` : ''}
                         {m.schemes?.length ? ` ${m.schemes.join(', ')}` : ''}
@@ -295,19 +363,19 @@ export const PresetsView: React.FC<PresetsViewProps> = ({
 
               {/* Apply Button */}
               <button
-                onClick={() => handleApply(p)}
+                onClick={() => handlePreview(p)}
                 disabled={isApplying}
-                className="w-full flex items-center justify-center gap-2 py-2.5 rounded-xl bg-indigo-600 hover:bg-indigo-700 text-white font-bold text-xs transition-all shadow-md shadow-indigo-600/20 disabled:opacity-50 cursor-pointer active:scale-[0.98]"
+                className="w-full flex items-center justify-center gap-2 py-2.5 rounded-xl bg-brand-600 hover:bg-brand-700 text-white font-bold text-xs transition-all shadow-md shadow-brand-600/20 disabled:opacity-50 cursor-pointer active:scale-[0.98]"
               >
                 {isApplying ? (
                   <>
                     <div className="w-3.5 h-3.5 border-2 border-white border-t-transparent rounded-full animate-spin" />
-                    <span>Aplicando Preset...</span>
+                    <span>Preparando prévia...</span>
                   </>
                 ) : (
                   <>
-                    <Play className="w-3.5 h-3.5" />
-                    <span>Aplicar Preset com 1-Clique</span>
+                    <Eye className="w-3.5 h-3.5" />
+                    <span>Revisar alterações</span>
                   </>
                 )}
               </button>
@@ -315,31 +383,42 @@ export const PresetsView: React.FC<PresetsViewProps> = ({
           )
         })}
       </div>
+      )}
+
+      <DryRunPreviewModal
+        isOpen={Boolean(previewingPreset)}
+        onClose={() => {
+          setPreviewingPreset(null)
+          setDryRunResult(null)
+        }}
+        onConfirmApply={handleApply}
+        dryRunResult={dryRunResult}
+        applying={applyingId === previewingPreset?.id}
+      />
 
       {/* Export Modal */}
       {exportModalPreset && (
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 backdrop-blur-md p-4">
-          <div className="bg-white border border-slate-200 rounded-3xl w-full max-w-lg shadow-2xl p-6 space-y-4">
+          <div ref={exportDialogRef} role="dialog" aria-modal="true" aria-labelledby="preset-export-title" tabIndex={-1} className="bg-white border border-slate-200 rounded-3xl w-full max-w-lg shadow-2xl p-6 space-y-4">
             <div className="flex items-center justify-between border-b border-slate-100 pb-3">
-              <h3 className="text-base font-bold text-slate-900">Exportar Preset: {exportModalPreset.name}</h3>
-              <button onClick={() => setExportModalPreset(null)} className="text-slate-400 hover:text-slate-700">
+              <h3 id="preset-export-title" className="min-w-0 flex-1 break-words text-base font-bold text-slate-900">Exportar Preset: {exportModalPreset.name}</h3>
+              <button type="button" aria-label="Fechar exportação do preset" onClick={() => setExportModalPreset(null)} className="text-slate-500 hover:text-slate-700">
                 <X className="w-5 h-5" />
               </button>
             </div>
             <textarea
               readOnly
+              aria-label="JSON do preset exportado"
               value={exportedJson}
               rows={10}
-              className="w-full p-3 bg-slate-50 border border-slate-200 rounded-xl font-mono text-xs text-indigo-700 focus:outline-none select-all"
+              className="w-full p-3 bg-slate-50 border border-slate-200 rounded-xl font-mono text-xs text-brand-700 focus:outline-none select-all"
             />
+            {exportCopyError && <p role="alert" className="text-xs text-rose-700">{exportCopyError}</p>}
             <div className="flex justify-end gap-2">
               <button
-                onClick={() => {
-                  navigator.clipboard.writeText(exportedJson)
-                  setAlert({ type: 'success', message: 'JSON copiado para a área de transferência!' })
-                  setExportModalPreset(null)
-                }}
-                className="px-4 py-2 bg-indigo-600 hover:bg-indigo-700 text-white text-xs font-bold rounded-xl cursor-pointer active:scale-[0.98] shadow-2xs"
+                type="button"
+                onClick={handleCopyExport}
+                className="px-4 py-2 bg-brand-600 hover:bg-brand-700 text-white text-xs font-bold rounded-xl cursor-pointer active:scale-[0.98] shadow-2xs"
               >
                 Copiar JSON
               </button>
@@ -351,19 +430,20 @@ export const PresetsView: React.FC<PresetsViewProps> = ({
       {/* Import Modal */}
       {isImportModalOpen && (
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 backdrop-blur-md p-4">
-          <div className="bg-white border border-slate-200 rounded-3xl w-full max-w-lg shadow-2xl p-6 space-y-4">
+          <div ref={importDialogRef} role="dialog" aria-modal="true" aria-labelledby="preset-import-title" tabIndex={-1} className="bg-white border border-slate-200 rounded-3xl w-full max-w-lg shadow-2xl p-6 space-y-4">
             <div className="flex items-center justify-between border-b border-slate-100 pb-3">
-              <h3 className="text-base font-bold text-slate-900">Importar Preset (.json)</h3>
-              <button onClick={() => setIsImportModalOpen(false)} className="text-slate-400 hover:text-slate-700">
+              <h3 id="preset-import-title" className="text-base font-bold text-slate-900">Importar Preset (.json)</h3>
+              <button type="button" aria-label="Fechar importação do preset" onClick={() => setIsImportModalOpen(false)} className="text-slate-500 hover:text-slate-700">
                 <X className="w-5 h-5" />
               </button>
             </div>
             <textarea
+              aria-label="JSON do preset para importar"
               placeholder="Cole a estrutura JSON do preset aqui..."
               value={importJsonText}
               onChange={(e) => setImportJsonText(e.target.value)}
               rows={10}
-              className="w-full p-3 bg-slate-50 border border-slate-200 rounded-xl font-mono text-xs text-slate-800 focus:outline-none focus:border-indigo-500 font-medium"
+              className="w-full p-3 bg-slate-50 border border-slate-200 rounded-xl font-mono text-xs text-slate-800 focus:outline-none focus:border-brand-500 font-medium"
             />
             <div className="flex justify-end gap-2">
               <button
@@ -374,7 +454,7 @@ export const PresetsView: React.FC<PresetsViewProps> = ({
               </button>
               <button
                 onClick={handleImport}
-                className="px-4 py-2 bg-indigo-600 hover:bg-indigo-700 text-white text-xs font-bold rounded-xl cursor-pointer active:scale-[0.98] shadow-2xs"
+                className="px-4 py-2 bg-brand-600 hover:bg-brand-700 text-white text-xs font-bold rounded-xl cursor-pointer active:scale-[0.98] shadow-2xs"
               >
                 Importar
               </button>
@@ -386,55 +466,59 @@ export const PresetsView: React.FC<PresetsViewProps> = ({
       {/* Create New Preset Modal */}
       {isNewModalOpen && (
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 backdrop-blur-md p-4">
-          <div className="bg-white border border-slate-200 rounded-3xl w-full max-w-lg shadow-2xl p-6 space-y-4">
+          <div ref={createDialogRef} role="dialog" aria-modal="true" aria-labelledby="preset-create-title" tabIndex={-1} className="bg-white border border-slate-200 rounded-3xl w-full max-w-lg shadow-2xl p-6 space-y-4">
             <div className="flex items-center justify-between border-b border-slate-100 pb-3">
-              <h3 className="text-base font-bold text-slate-900">Criar Novo Preset</h3>
-              <button onClick={() => setIsNewModalOpen(false)} className="text-slate-400 hover:text-slate-700">
+              <h3 id="preset-create-title" className="text-base font-bold text-slate-900">Criar Novo Preset</h3>
+              <button type="button" aria-label="Fechar criação do preset" onClick={() => setIsNewModalOpen(false)} className="text-slate-500 hover:text-slate-700">
                 <X className="w-5 h-5" />
               </button>
             </div>
             <div className="space-y-3 text-xs">
               <div>
-                <label className="block text-slate-700 font-bold mb-1">Nome do Preset</label>
+                <label htmlFor="preset-name" className="block text-slate-700 font-bold mb-1">Nome do Preset</label>
                 <input
+                  id="preset-name"
                   type="text"
                   placeholder="Ex: Meu Setup Dev 2026"
                   value={newPresetName}
                   onChange={(e) => setNewPresetName(e.target.value)}
-                  className="w-full px-3 py-2 bg-slate-50 border border-slate-200 rounded-xl text-slate-800 focus:outline-none focus:border-indigo-500 font-medium"
+                  className="w-full px-3 py-2 bg-slate-50 border border-slate-200 rounded-xl text-slate-800 focus:outline-none focus:border-brand-500 font-medium"
                 />
               </div>
 
               <div>
-                <label className="block text-slate-700 font-bold mb-1">Descrição</label>
+                <label htmlFor="preset-description" className="block text-slate-700 font-bold mb-1">Descrição</label>
                 <input
+                  id="preset-description"
                   type="text"
                   placeholder="Ex: Associações para projetos React e Rust"
                   value={newPresetDesc}
                   onChange={(e) => setNewPresetDesc(e.target.value)}
-                  className="w-full px-3 py-2 bg-slate-50 border border-slate-200 rounded-xl text-slate-800 focus:outline-none focus:border-indigo-500 font-medium"
+                  className="w-full px-3 py-2 bg-slate-50 border border-slate-200 rounded-xl text-slate-800 focus:outline-none focus:border-brand-500 font-medium"
                 />
               </div>
 
               <div>
-                <label className="block text-slate-700 font-bold mb-1">Aplicativo Padrão</label>
+                <label htmlFor="preset-app" className="block text-slate-700 font-bold mb-1">Aplicativo Padrão</label>
                 <input
+                  id="preset-app"
                   type="text"
                   placeholder="Ex: Visual Studio Code"
                   value={newPresetAppName}
                   onChange={(e) => setNewPresetAppName(e.target.value)}
-                  className="w-full px-3 py-2 bg-slate-50 border border-slate-200 rounded-xl text-slate-800 focus:outline-none focus:border-indigo-500 font-medium"
+                  className="w-full px-3 py-2 bg-slate-50 border border-slate-200 rounded-xl text-slate-800 focus:outline-none focus:border-brand-500 font-medium"
                 />
               </div>
 
               <div>
-                <label className="block text-slate-700 font-bold mb-1">Extensões (separadas por vírgula)</label>
+                <label htmlFor="preset-extensions" className="block text-slate-700 font-bold mb-1">Extensões (separadas por vírgula)</label>
                 <input
+                  id="preset-extensions"
                   type="text"
                   placeholder="Ex: ts, tsx, js, json, rs, toml"
                   value={newPresetExts}
                   onChange={(e) => setNewPresetExts(e.target.value)}
-                  className="w-full px-3 py-2 bg-slate-50 border border-slate-200 rounded-xl text-slate-800 font-mono focus:outline-none focus:border-indigo-500 font-medium"
+                  className="w-full px-3 py-2 bg-slate-50 border border-slate-200 rounded-xl text-slate-800 font-mono focus:outline-none focus:border-brand-500 font-medium"
                 />
               </div>
             </div>
@@ -448,7 +532,7 @@ export const PresetsView: React.FC<PresetsViewProps> = ({
               </button>
               <button
                 onClick={handleSaveNew}
-                className="px-4 py-2 bg-indigo-600 hover:bg-indigo-700 text-white text-xs font-bold rounded-xl cursor-pointer active:scale-[0.98] shadow-2xs"
+                className="px-4 py-2 bg-brand-600 hover:bg-brand-700 text-white text-xs font-bold rounded-xl cursor-pointer active:scale-[0.98] shadow-2xs"
               >
                 Salvar Preset
               </button>

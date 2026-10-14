@@ -19,7 +19,6 @@ import {
   DetectConflicts,
   ListPresets,
   ListSnapshots,
-  SetHandler,
   GetAppVersion,
   CheckForAppUpdate
 } from '../wailsjs/go/main/App'
@@ -34,11 +33,13 @@ export function App() {
   const [presetsList, setPresetsList] = useState<presets.Preset[]>([])
   const [snapshotsList, setSnapshotsList] = useState<snapshots.Snapshot[]>([])
 
-  const [appVersion, setAppVersion] = useState<string>('1.0.1')
+  const [appVersion, setAppVersion] = useState<string | null>(null)
   const [updateInfo, setUpdateInfo] = useState<autoupdate.UpdateCheckResult | null>(null)
   const [updateModalOpen, setUpdateModalOpen] = useState(false)
 
   const [loading, setLoading] = useState(false)
+  const [loadFailures, setLoadFailures] = useState<string[]>([])
+  const loadSequence = useRef(0)
   const routeFocusPending = useRef(false)
   const mainContentRef = useRef<HTMLElement | null>(null)
   const [binaryModalOpen, setBinaryModalOpen] = useState(false)
@@ -48,53 +49,48 @@ export function App() {
   const [selectedAppForSet, setSelectedAppForSet] = useState<string | null>(null)
   const [selectedExtsForSet, setSelectedExtsForSet] = useState<string[]>([])
   const [selectedUTIsForSet, setSelectedUTIsForSet] = useState<string[]>([])
+  const [selectedSchemesForSet, setSelectedSchemesForSet] = useState<string[]>([])
   const [selectedAppForMigrate, setSelectedAppForMigrate] = useState<string | null>(null)
 
   const loadAllData = useCallback(async () => {
+    const sequence = ++loadSequence.current
     setLoading(true)
+    setLoadFailures([])
+    const failures: string[] = []
+    const load = <T,>(label: string, request: Promise<T>, update: (value: T) => void) =>
+      request.then((value) => {
+        if (sequence === loadSequence.current) update(value)
+      }).catch((e) => {
+        if (sequence !== loadSequence.current) return
+        failures.push(label)
+        console.warn(`Failed to load ${label}:`, e)
+      })
+
     try {
-      // App Version
-      try {
-        const v = await GetAppVersion()
-        if (v) setAppVersion(v)
-      } catch (e) {
-        console.warn('Failed to get app version:', e)
-      }
+      void CheckForAppUpdate()
+        .then((info) => {
+          if (sequence === loadSequence.current) setUpdateInfo(info)
+        })
+        .catch((e) => {
+          if (sequence === loadSequence.current) console.warn('Failed to check for updates:', e)
+        })
 
-      // Check for GUI update in background
-      try {
-        const updateRes = await CheckForAppUpdate()
-        setUpdateInfo(updateRes)
-      } catch (e) {
-        console.warn('Failed to check for updates:', e)
-      }
-
-      // Binary status
-      const bStatus = await GetBinaryStatus()
-      setBinaryStatus(bStatus)
-
-      // Fetch apps
-      const appsData = await ListApps('')
-      setApps(appsData || [])
-
-      // Fetch targets
-      const targetsData = await ListTargets('')
-      setTargets(targetsData || [])
-
-      // Detect conflicts
-      const conflictsData = await DetectConflicts()
-      setConflicts(conflictsData || [])
-
-      // Fetch presets & snapshots
-      const presetsData = await ListPresets()
-      setPresetsList(presetsData || [])
-
-      const snapsData = await ListSnapshots()
-      setSnapshotsList(snapsData || [])
+      await Promise.all([
+        load('versão do app', GetAppVersion(), (version) => { if (version) setAppVersion(version) }),
+        load('status do binário', GetBinaryStatus(), setBinaryStatus),
+        load('aplicativos', ListApps(''), (data) => setApps(data || [])),
+        load('alvos', ListTargets(''), (data) => setTargets(data || [])),
+        load('conflitos', DetectConflicts(), (data) => setConflicts(data || [])),
+        load('presets', ListPresets(), (data) => setPresetsList(data || [])),
+        load('snapshots', ListSnapshots(), (data) => setSnapshotsList(data || []))
+      ])
+      if (sequence === loadSequence.current) setLoadFailures(failures)
     } catch (err) {
+      if (sequence !== loadSequence.current) return
       console.error('Failed to load initial data:', err)
+      setLoadFailures(failures.length > 0 ? failures : ['dados essenciais'])
     } finally {
-      setLoading(false)
+      if (sequence === loadSequence.current) setLoading(false)
     }
   }, [])
 
@@ -131,6 +127,7 @@ export function App() {
     setSelectedAppForSet(appName)
     setSelectedExtsForSet(exts)
     setSelectedUTIsForSet(utis)
+    setSelectedSchemesForSet([])
     navigateToTab('set')
   }
 
@@ -139,13 +136,23 @@ export function App() {
     navigateToTab('migrate')
   }
 
-  const handleQuickSetDefault = async (appName: string, exts: string[], utis: string[], schemes: string[]) => {
-    try {
-      await SetHandler(appName, exts, utis, schemes, false)
-      await loadAllData()
-    } catch (e) {
-      console.error(e)
+  const handleQuickSetDefault = (appName: string, exts: string[], utis: string[], schemes: string[]) => {
+    setSelectedAppForSet(appName)
+    setSelectedExtsForSet(exts)
+    setSelectedUTIsForSet(utis)
+    setSelectedSchemesForSet(schemes)
+    navigateToTab('set')
+  }
+
+  const handleNavigate = (tab: NavTab) => {
+    if (tab === 'set' && currentTab !== 'set') {
+      setSelectedAppForSet(null)
+      setSelectedExtsForSet([])
+      setSelectedUTIsForSet([])
+      setSelectedSchemesForSet([])
     }
+    if (tab === 'migrate' && currentTab !== 'migrate') setSelectedAppForMigrate(null)
+    navigateToTab(tab)
   }
 
   const getTabTitle = (tab: NavTab) => {
@@ -172,51 +179,54 @@ export function App() {
       {/* Sidebar */}
       <Sidebar
         currentTab={currentTab}
-        onSelectTab={navigateToTab}
+        onSelectTab={handleNavigate}
         onOpenLogs={() => setLogsDrawerOpen(true)}
         onOpenBinaryModal={() => setBinaryModalOpen(true)}
-        onOpenUpdateModal={() => setUpdateModalOpen(true)}
-        binaryInstalled={binaryStatus?.installed || false}
-        conflictCount={conflicts.length}
-        appVersion={appVersion}
-        updateAvailable={updateInfo?.updateAvailable || false}
-        latestAppVersion={updateInfo?.latestVersion}
+        binaryInstalled={loadFailures.includes('status do binário') ? null : binaryStatus?.installed ?? null}
+        conflictCount={loadFailures.includes('conflitos') ? null : conflicts.length}
       />
 
       {/* Main View Area */}
       <div className="flex-1 flex flex-col min-w-0 overflow-hidden bg-slate-100">
         <Header
           title={getTabTitle(currentTab)}
-          subtitle={
-            binaryStatus?.path ? `Binário: ${binaryStatus.path}` : 'Binário dutix não configurado'
-          }
           loading={loading}
           onRefresh={loadAllData}
-          onOpenBinaryModal={() => setBinaryModalOpen(true)}
-          onOpenLogs={() => setLogsDrawerOpen(true)}
-          onOpenQuickPreset={() => navigateToTab('presets')}
           onOpenUpdateModal={() => setUpdateModalOpen(true)}
-          version={binaryStatus?.version}
+          appVersion={loadFailures.includes('versão do app') ? null : appVersion}
           updateAvailable={updateInfo?.updateAvailable || false}
           latestAppVersion={updateInfo?.latestVersion}
         />
 
+        {loadFailures.length > 0 && (
+          <div role="alert" aria-atomic="true" className="mx-4 mt-3 flex flex-wrap items-center justify-between gap-3 rounded-xl border border-rose-200 bg-rose-50 px-4 py-3 text-xs text-rose-800">
+            <span className="min-w-0 flex-1">
+              Falha ao carregar {loadFailures.join(', ')}. Totais e listas podem estar incompletos.
+            </span>
+            <button
+              type="button"
+              onClick={loadAllData}
+              disabled={loading}
+              className="shrink-0 rounded-lg border border-rose-300 bg-white px-3 py-1.5 font-semibold text-rose-800 hover:bg-rose-100 disabled:opacity-50"
+            >
+              Tentar novamente
+            </button>
+          </div>
+        )}
+
         <main
           ref={mainContentRef}
+          key={currentTab}
           tabIndex={-1}
           aria-label={getTabTitle(currentTab)}
-          key={currentTab}
           className={`app-route-surface flex-1 overflow-hidden relative${useCssRouteTransition ? ' app-route-surface-fallback' : ''}`}
         >
           {currentTab === 'dashboard' && (
             <DashboardView
-              onNavigate={navigateToTab}
-              appCount={apps.length}
-              targetCount={targets.length}
-              conflictCount={conflicts.length}
-              binaryStatus={binaryStatus}
-              recentSnapshots={snapshotsList}
-              onOpenBinaryModal={() => setBinaryModalOpen(true)}
+              onNavigate={handleNavigate}
+              appCount={loadFailures.includes('aplicativos') ? null : apps.length}
+              targetCount={loadFailures.includes('alvos') ? null : targets.length}
+              conflictCount={loadFailures.includes('conflitos') ? null : conflicts.length}
               onQuickSetDefault={handleQuickSetDefault}
             />
           )}
@@ -225,6 +235,7 @@ export function App() {
             <AppsView
               apps={apps}
               loading={loading}
+              loadFailed={loadFailures.includes('aplicativos')}
               onSetAsDefault={handleSetAsDefaultFromApp}
               onMigrateApp={handleMigrateFromApp}
             />
@@ -236,6 +247,8 @@ export function App() {
               initialApp={selectedAppForSet}
               initialExtensions={selectedExtsForSet}
               initialUTIs={selectedUTIsForSet}
+              initialSchemes={selectedSchemesForSet}
+              appsLoadFailed={loadFailures.includes('aplicativos')}
               onSuccess={loadAllData}
             />
           )}
@@ -244,6 +257,7 @@ export function App() {
             <MigrationView
               apps={apps}
               initialSourceApp={selectedAppForMigrate}
+              appsLoadFailed={loadFailures.includes('aplicativos')}
               onSuccess={loadAllData}
             />
           )}
@@ -253,6 +267,8 @@ export function App() {
               targets={targets}
               conflicts={conflicts}
               loading={loading}
+              targetsLoadFailed={loadFailures.includes('alvos')}
+              conflictsLoadFailed={loadFailures.includes('conflitos')}
               onRefresh={loadAllData}
             />
           )}
@@ -261,6 +277,7 @@ export function App() {
             <PresetsView
               presetsList={presetsList}
               loading={loading}
+              loadFailed={loadFailures.includes('presets')}
               onRefresh={loadAllData}
             />
           )}
@@ -269,6 +286,7 @@ export function App() {
             <SnapshotsView
               snapshotList={snapshotsList}
               loading={loading}
+              loadFailed={loadFailures.includes('snapshots')}
               onRefresh={loadAllData}
             />
           )}

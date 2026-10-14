@@ -22,6 +22,8 @@ interface TargetsViewProps {
   targets: dutix.TargetItem[]
   conflicts: dutix.ConflictItem[]
   loading: boolean
+  targetsLoadFailed: boolean
+  conflictsLoadFailed: boolean
   onRefresh: () => void
 }
 
@@ -29,12 +31,16 @@ export const TargetsView: React.FC<TargetsViewProps> = ({
   targets,
   conflicts,
   loading,
+  targetsLoadFailed,
+  conflictsLoadFailed,
   onRefresh
 }) => {
   const [activeTab, setActiveTab] = useState<'all' | 'conflicts'>('all')
   const [searchQuery, setSearchQuery] = useState('')
+  const [visibleTargetCount, setVisibleTargetCount] = useState(200)
   const [selectedTarget, setSelectedTarget] = useState<string | null>(null)
   const [targetDetail, setTargetDetail] = useState<dutix.TargetDetail | null>(null)
+  const [detailError, setDetailError] = useState<string | null>(null)
   const [loadingDetail, setLoadingDetail] = useState(false)
   const [switchingApp, setSwitchingApp] = useState<string | null>(null)
   const [alert, setAlert] = useState<{ type: 'success' | 'error'; message: string } | null>(null)
@@ -50,18 +56,22 @@ export const TargetsView: React.FC<TargetsViewProps> = ({
 
   const handleInspectTarget = async (targetId: string) => {
     setSelectedTarget(targetId)
+    setTargetDetail(null)
+    setDetailError(null)
     setLoadingDetail(true)
     try {
       const res = await ShowTarget(targetId)
       setTargetDetail(res)
     } catch (e: any) {
       console.error(e)
+      setDetailError(e?.message || 'Falha ao consultar os detalhes do alvo.')
     } finally {
       setLoadingDetail(false)
     }
   }
 
   const handleQuickSwitch = async (targetIdentifier: string, appPathOrName: string) => {
+    if (switchingApp !== null) return
     setSwitchingApp(appPathOrName)
     setAlert(null)
 
@@ -105,16 +115,18 @@ export const TargetsView: React.FC<TargetsViewProps> = ({
         <div className="flex bg-slate-100 border border-slate-200 rounded-xl p-1 shrink-0 shadow-2xs">
           <button
             onClick={() => setActiveTab('all')}
+            aria-pressed={activeTab === 'all'}
             className={`px-3.5 py-1.5 rounded-lg text-xs font-bold transition-all cursor-pointer ${
               activeTab === 'all'
-                ? 'bg-indigo-600 text-white shadow-2xs'
+                ? 'bg-brand-600 text-white shadow-2xs'
                 : 'text-slate-600 hover:text-slate-900'
             }`}
           >
-            Todos os Alvos ({targets.length})
+            Todos os Alvos ({targetsLoadFailed ? '—' : targets.length})
           </button>
           <button
             onClick={() => setActiveTab('conflicts')}
+            aria-pressed={activeTab === 'conflicts'}
             className={`px-3.5 py-1.5 rounded-lg text-xs font-bold transition-all flex items-center gap-1.5 cursor-pointer ${
               activeTab === 'conflicts'
                 ? 'bg-amber-600 text-white shadow-2xs'
@@ -122,7 +134,7 @@ export const TargetsView: React.FC<TargetsViewProps> = ({
             }`}
           >
             <AlertTriangle className="w-3.5 h-3.5" />
-            <span>Conflitos ({conflicts.length})</span>
+            <span>Conflitos ({conflictsLoadFailed ? '—' : conflicts.length})</span>
           </button>
         </div>
       </div>
@@ -130,6 +142,8 @@ export const TargetsView: React.FC<TargetsViewProps> = ({
       {/* Alert Banner */}
       {alert && (
         <div
+          role={alert.type === 'error' ? 'alert' : 'status'}
+          aria-atomic="true"
           className={`p-4 rounded-2xl border text-xs flex items-center justify-between font-medium ${
             alert.type === 'success'
               ? 'bg-emerald-50 border-emerald-200 text-emerald-800'
@@ -144,21 +158,25 @@ export const TargetsView: React.FC<TargetsViewProps> = ({
             )}
             <span>{alert.message}</span>
           </div>
-          <button onClick={() => setAlert(null)} className="text-slate-500 hover:text-slate-800 cursor-pointer">
-            <X className="w-4 h-4" />
+          <button type="button" onClick={() => setAlert(null)} aria-label="Fechar aviso" className="text-slate-500 hover:text-slate-800 cursor-pointer">
+            <X className="w-4 h-4" aria-hidden="true" />
           </button>
         </div>
       )}
 
       {/* Search Bar */}
       <div className="relative">
-        <Search className="w-4 h-4 absolute left-3 top-3 text-slate-400" />
+        <Search className="w-4 h-4 absolute left-3 top-3 text-slate-500" />
         <input
           type="text"
+          aria-label="Pesquisar alvos"
           placeholder="Pesquisar por extensão (ex: pdf, json), UTI ou nome do app..."
           value={searchQuery}
-          onChange={(e) => setSearchQuery(e.target.value)}
-          className="w-full pl-9 pr-4 py-2.5 bg-white border border-slate-200 rounded-2xl text-xs text-slate-800 placeholder-slate-400 focus:border-indigo-500 transition-colors shadow-2xs font-medium"
+          onChange={(e) => {
+            setSearchQuery(e.target.value)
+            setVisibleTargetCount(200)
+          }}
+          className="w-full pl-9 pr-4 py-2.5 bg-white border border-slate-200 rounded-2xl text-xs text-slate-800 placeholder-slate-500 focus:border-brand-500 transition-colors shadow-2xs font-medium"
         />
       </div>
 
@@ -177,25 +195,40 @@ export const TargetsView: React.FC<TargetsViewProps> = ({
                   </tr>
                 </thead>
                 <tbody className="divide-y divide-slate-100">
-                  {filteredTargets.slice(0, 200).map((t, idx) => {
+                  {loading && targets.length === 0 ? (
+                    <tr><td colSpan={3} className="px-5 py-8 text-center text-slate-500">Carregando associações...</td></tr>
+                  ) : targetsLoadFailed && targets.length === 0 ? (
+                    <tr><td colSpan={3} role="status" className="px-5 py-8 text-center text-rose-800">Não foi possível carregar as associações. Tente atualizar os dados.</td></tr>
+                  ) : filteredTargets.length === 0 ? (
+                    <tr><td colSpan={3} className="px-5 py-8 text-center text-slate-500">Nenhuma associação encontrada.</td></tr>
+                  ) : filteredTargets.slice(0, visibleTargetCount).map((t, idx) => {
                     const isSelected = selectedTarget === t.extension
                     return (
                       <tr
                         key={idx}
-                        onClick={() => handleInspectTarget(t.extension)}
-                        className={`hover:bg-slate-50 transition-colors cursor-pointer ${
-                          isSelected ? 'bg-indigo-50/70 border-l-2 border-indigo-600' : ''
+                        className={`hover:bg-slate-50 transition-colors ${
+                          isSelected ? 'bg-brand-50/70 border-l-2 border-brand-600' : ''
                         }`}
                       >
-                        <td className="w-32 truncate px-5 py-3 font-mono font-bold text-indigo-700">
-                          .{t.extension}
+                        <td className="w-32 truncate px-5 py-3 font-mono font-bold text-brand-700">
+                          <button
+                            type="button"
+                            onClick={() => handleInspectTarget(t.extension)}
+                            disabled={loadingDetail}
+                            aria-pressed={isSelected}
+                            aria-label={`Inspecionar .${t.extension}`}
+                            title={`.${t.extension}`}
+                            className="text-left hover:underline focus-visible:outline-none disabled:cursor-wait disabled:opacity-50"
+                          >
+                            .{t.extension}
+                          </button>
                         </td>
                         <td className="hidden max-w-xs truncate px-5 py-3 font-mono text-xs text-slate-500 xl:table-cell">
                           {t.uti}
                         </td>
-                        <td className="px-5 py-3 font-semibold text-slate-800 truncate max-w-xs">
+                        <td className="max-w-xs truncate px-5 py-3 font-semibold text-slate-800" title={t.default_app?.name || 'Não configurado'}>
                           {t.default_app?.name || (
-                            <span className="text-slate-400 italic">Não configurado</span>
+                            <span className="text-slate-500 italic">Não configurado</span>
                           )}
                         </td>
                       </tr>
@@ -204,20 +237,38 @@ export const TargetsView: React.FC<TargetsViewProps> = ({
                 </tbody>
               </table>
             </div>
+            {filteredTargets.length > 0 && (
+              <div className="flex items-center justify-between gap-3 border-t border-slate-100 px-4 py-3 text-xs">
+                <p role="status" className="text-slate-600">
+                  Exibindo {Math.min(visibleTargetCount, filteredTargets.length)} de {filteredTargets.length} alvos
+                </p>
+                {visibleTargetCount < filteredTargets.length && (
+                  <button
+                    type="button"
+                    onClick={() => setVisibleTargetCount((count) => count + 200)}
+                    className="shrink-0 rounded-lg border border-slate-200 bg-white px-3 py-1.5 font-semibold text-slate-700 hover:bg-slate-50 focus-visible:outline-none"
+                  >
+                    Carregar mais
+                  </button>
+                )}
+              </div>
+            )}
           </div>
 
           {/* Target Inspector Panel */}
           <div className="lg:col-span-5 bg-white border border-slate-200/90 rounded-3xl p-6 space-y-5 shadow-xs">
             <div className="flex items-center gap-2 text-sm font-bold text-slate-900 border-b border-slate-100 pb-3">
-              <SearchCode className="w-4 h-4 text-indigo-600" />
+              <SearchCode className="w-4 h-4 text-brand-600" />
               <span>Inspetor do Alvo: {selectedTarget ? `.${selectedTarget}` : 'Nenhum selecionado'}</span>
             </div>
 
             {loadingDetail ? (
               <div className="py-20 text-center space-y-2">
-                <div className="w-6 h-6 border-2 border-indigo-600 border-t-transparent rounded-full animate-spin mx-auto" />
+                <div className="w-6 h-6 border-2 border-brand-600 border-t-transparent rounded-full animate-spin mx-auto" />
                 <p className="text-xs text-slate-500 font-medium">Consultando LaunchServices...</p>
               </div>
+            ) : detailError ? (
+              <p role="alert" className="py-12 text-center text-xs font-medium text-rose-800">{detailError}</p>
             ) : targetDetail ? (
               <div className="space-y-4 text-xs">
                 {/* Current Default App */}
@@ -283,8 +334,8 @@ export const TargetsView: React.FC<TargetsViewProps> = ({
                           ) : (
                             <button
                               onClick={() => handleQuickSwitch(selectedTarget!, appName)}
-                              disabled={isSwitching}
-                              className="px-2.5 py-1 rounded-lg bg-indigo-600 hover:bg-indigo-700 text-white font-bold text-xs transition-all disabled:opacity-50 cursor-pointer active:scale-[0.96] shadow-2xs"
+                              disabled={switchingApp !== null}
+                              className="px-2.5 py-1 rounded-lg bg-brand-600 hover:bg-brand-700 text-white font-bold text-xs transition-all disabled:opacity-50 cursor-pointer active:scale-[0.96] shadow-2xs"
                             >
                               {isSwitching ? 'Alterando...' : 'Definir'}
                             </button>
@@ -296,7 +347,7 @@ export const TargetsView: React.FC<TargetsViewProps> = ({
                 </div>
               </div>
             ) : (
-              <div className="py-16 text-center text-slate-400 text-xs font-medium">
+              <div className="py-16 text-center text-slate-500 text-xs font-medium">
                 Selecione uma extensão na tabela para inspecionar
               </div>
             )}
@@ -307,12 +358,20 @@ export const TargetsView: React.FC<TargetsViewProps> = ({
       {/* Tab 2: Conflict Diagnostics */}
       {activeTab === 'conflicts' && (
         <div className="space-y-4">
-          {conflicts.length === 0 ? (
+          {loading && conflicts.length === 0 ? (
+            <div className="p-12 text-center bg-white rounded-3xl border border-slate-200 text-sm text-slate-500">
+              Carregando diagnóstico...
+            </div>
+          ) : conflictsLoadFailed && conflicts.length === 0 ? (
+            <div role="status" className="p-12 text-center bg-white rounded-3xl border border-slate-200 text-sm text-rose-800">
+              Não foi possível carregar o diagnóstico. Tente atualizar os dados.
+            </div>
+          ) : conflicts.length === 0 ? (
             <div className="p-12 text-center bg-emerald-50 rounded-3xl border border-emerald-200 space-y-3 shadow-xs">
               <CheckCircle2 className="w-12 h-12 text-emerald-600 mx-auto" />
-              <h3 className="text-base font-bold text-emerald-800">Sistema 100% Saudável!</h3>
+              <h3 className="text-base font-bold text-emerald-800">Nenhum conflito encontrado</h3>
               <p className="text-xs text-slate-600 max-w-md mx-auto leading-relaxed font-medium">
-                Nenhum conflito ou bundle órfão foi encontrado. Todas as associações registradas apontam para aplicativos válidos e existentes no macOS.
+                A verificação atual não encontrou associações apontando para aplicativos inexistentes.
               </p>
             </div>
           ) : (
@@ -352,7 +411,7 @@ export const TargetsView: React.FC<TargetsViewProps> = ({
                               setActiveTab('all')
                               handleInspectTarget(c.extension)
                             }}
-                            className="px-3 py-1 rounded-xl bg-indigo-600 hover:bg-indigo-700 text-white font-sans text-xs font-bold transition-all cursor-pointer active:scale-[0.96] shadow-2xs"
+                            className="px-3 py-1 rounded-xl bg-brand-600 hover:bg-brand-700 text-white font-sans text-xs font-bold transition-all cursor-pointer active:scale-[0.96] shadow-2xs"
                           >
                             Reparar / Reatribuir
                           </button>

@@ -1,4 +1,5 @@
 import React from 'react'
+import { useAccessibleDialog } from '../../utils/useAccessibleDialog'
 import {
   X,
   Play,
@@ -28,29 +29,41 @@ export const DryRunPreviewModal: React.FC<DryRunPreviewModalProps> = ({
   applying,
   appName
 }) => {
+  const dialogRef = useAccessibleDialog(isOpen && Boolean(dryRunResult), onClose, { canClose: !applying })
+
   if (!isOpen || !dryRunResult) return null
 
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 backdrop-blur-md p-4 animate-in fade-in duration-150">
-      <div className="bg-white border border-slate-200 rounded-3xl w-full max-w-3xl shadow-2xl overflow-hidden flex flex-col max-h-[90vh]">
+      <div
+        ref={dialogRef}
+        role="dialog"
+        aria-modal="true"
+        aria-labelledby="dry-run-dialog-title"
+        tabIndex={-1}
+        className="bg-white border border-slate-200 rounded-3xl w-full max-w-3xl shadow-2xl overflow-hidden flex flex-col max-h-[90vh]"
+      >
         {/* Header */}
         <div className="px-6 py-5 border-b border-slate-200 flex items-center justify-between bg-slate-50/80">
           <div className="flex items-center gap-3">
-            <div className="w-10 h-10 rounded-xl bg-indigo-50 border border-indigo-200 flex items-center justify-center text-indigo-700">
+            <div className="w-10 h-10 rounded-xl bg-brand-50 border border-brand-200 flex items-center justify-center text-brand-700">
               <Clock className="w-5 h-5" />
             </div>
             <div>
-              <h2 className="text-base font-bold text-slate-900 tracking-tight">
-                Simulação de Alterações (Dry Run)
+              <h2 id="dry-run-dialog-title" className="text-base font-bold text-slate-900 tracking-tight">
+                Prévia das alterações
               </h2>
               <p className="text-xs text-slate-500 font-medium">
-                Pré-visualização segura antes de aplicar no LaunchServices do macOS
+                Confira os destinos antes de aplicar no macOS.
               </p>
             </div>
           </div>
           <button
+            type="button"
             onClick={onClose}
-            className="text-slate-400 hover:text-slate-700 p-2 rounded-xl hover:bg-slate-100 transition-colors cursor-pointer"
+            disabled={applying}
+            aria-label="Fechar prévia"
+            className="text-slate-500 hover:text-slate-700 p-2 rounded-xl hover:bg-slate-100 transition-colors disabled:opacity-50 cursor-pointer"
           >
             <X className="w-5 h-5" />
           </button>
@@ -60,9 +73,9 @@ export const DryRunPreviewModal: React.FC<DryRunPreviewModalProps> = ({
         <div className="p-6 overflow-y-auto space-y-5 text-xs text-slate-700">
           {/* Stats Bar */}
           <div className="grid grid-cols-4 gap-3">
-            <div className="p-3.5 rounded-2xl bg-indigo-50 border border-indigo-200 text-center shadow-2xs">
-              <span className="text-[10px] text-indigo-600 uppercase tracking-wider block font-bold">Pendentes</span>
-              <span className="text-xl font-bold font-mono text-indigo-900">
+            <div className="p-3.5 rounded-2xl bg-brand-50 border border-brand-200 text-center shadow-2xs">
+              <span className="text-[10px] text-brand-600 uppercase tracking-wider block font-bold">Pendentes</span>
+              <span className="text-xl font-bold font-mono text-brand-900">
                 {dryRunResult.stats?.pending || dryRunResult.items?.length || 0}
               </span>
             </div>
@@ -121,7 +134,7 @@ export const DryRunPreviewModal: React.FC<DryRunPreviewModalProps> = ({
                   <tbody className="divide-y divide-slate-100 font-mono">
                     {dryRunResult.items?.map((item, idx) => (
                       <tr key={idx} className="hover:bg-slate-50">
-                        <td className="px-4 py-2 text-indigo-700 truncate max-w-xs font-semibold">
+                        <td className="px-4 py-2 text-brand-700 truncate max-w-xs font-semibold">
                           {item.extension ? `.${item.extension} (${item.target})` : item.target}
                         </td>
                         <td className="px-4 py-2 text-slate-600 truncate max-w-xs">
@@ -137,7 +150,7 @@ export const DryRunPreviewModal: React.FC<DryRunPreviewModalProps> = ({
                                 ? 'bg-amber-50 text-amber-700 border border-amber-200'
                                 : item.status === 'failed'
                                 ? 'bg-rose-50 text-rose-700 border border-rose-200'
-                                : 'bg-indigo-50 text-indigo-700 border border-indigo-200'
+                                : 'bg-brand-50 text-brand-700 border border-brand-200'
                             }`}
                           >
                             {item.status}
@@ -155,8 +168,8 @@ export const DryRunPreviewModal: React.FC<DryRunPreviewModalProps> = ({
         {/* Footer with safety note */}
         <div className="px-6 py-4 border-t border-slate-200 bg-slate-50/80 flex flex-col sm:flex-row gap-3 items-center justify-between">
           <div className="flex items-center gap-2 text-xs text-slate-600 font-medium">
-            <ShieldAlert className="w-4 h-4 text-indigo-600 shrink-0" />
-            <span>Um snapshot de backup será gerado automaticamente antes de aplicar.</span>
+            <ShieldAlert className="w-4 h-4 text-brand-600 shrink-0" />
+            <span>Se houver associações atuais, um snapshot será criado antes de aplicar.</span>
           </div>
 
           <div className="flex items-center gap-3 w-full sm:w-auto justify-end">
@@ -170,7 +183,7 @@ export const DryRunPreviewModal: React.FC<DryRunPreviewModalProps> = ({
             <button
               onClick={onConfirmApply}
               disabled={applying}
-              className="flex items-center gap-2 px-5 py-2 rounded-xl bg-indigo-600 hover:bg-indigo-700 text-white text-xs font-bold transition-all shadow-md shadow-indigo-600/20 disabled:opacity-50 cursor-pointer active:scale-[0.98]"
+              className="flex items-center gap-2 px-5 py-2 rounded-xl bg-brand-600 hover:bg-brand-700 text-white text-xs font-bold transition-all shadow-md shadow-brand-600/20 disabled:opacity-50 cursor-pointer active:scale-[0.98]"
             >
               {applying ? (
                 <>
@@ -180,7 +193,7 @@ export const DryRunPreviewModal: React.FC<DryRunPreviewModalProps> = ({
               ) : (
                 <>
                   <Play className="w-3.5 h-3.5" />
-                  <span>Confirmar & Aplicar (--yes)</span>
+                  <span>Confirmar e aplicar</span>
                 </>
               )}
             </button>

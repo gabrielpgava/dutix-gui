@@ -1,29 +1,22 @@
 import React from 'react'
 import {
+  AlertTriangle,
+  CheckCircle2,
+  ChevronRight,
+  Code2,
+  Compass,
+  FileText,
   Grid,
   SearchCode,
-  Sparkles,
-  ArrowRightLeft,
-  History,
-  ShieldCheck,
-  AlertTriangle,
-  Compass,
-  Code2,
-  FileText,
-  CheckCircle2,
-  ChevronRight
+  Sparkles
 } from 'lucide-react'
 import { NavTab } from '../layout/Sidebar'
-import { dutix, snapshots } from '../../../wailsjs/go/models'
 
 interface DashboardViewProps {
   onNavigate: (tab: NavTab) => void
-  appCount: number
-  targetCount: number
-  conflictCount: number
-  binaryStatus: dutix.BinaryStatus | null
-  recentSnapshots: snapshots.Snapshot[]
-  onOpenBinaryModal: () => void
+  appCount: number | null
+  targetCount: number | null
+  conflictCount: number | null
   onQuickSetDefault: (app: string, exts: string[], utis: string[], schemes: string[]) => void
 }
 
@@ -32,248 +25,121 @@ export const DashboardView: React.FC<DashboardViewProps> = ({
   appCount,
   targetCount,
   conflictCount,
-  binaryStatus,
-  recentSnapshots,
-  onOpenBinaryModal,
   onQuickSetDefault
 }) => {
+  const metricClass = 'w-full rounded-2xl border border-slate-200 bg-white p-4 text-left transition-colors hover:border-brand-300 hover:bg-brand-50/40 focus-visible:outline-none'
+  const shortcutClass = 'flex items-center justify-between rounded-lg border border-slate-200 bg-white px-3 py-2 text-xs font-semibold text-slate-700 transition-colors hover:border-brand-300 hover:bg-brand-50 hover:text-brand-800 focus-visible:outline-none'
+
   return (
-    <div className="app-page max-w-6xl mx-auto space-y-8 overflow-y-auto h-full">
-      {/* Hero / Welcome macOS Surface Banner */}
-      <div className="relative overflow-hidden rounded-3xl bg-gradient-to-br from-indigo-50/80 via-white to-sky-50/40 border border-indigo-100/80 p-8 backdrop-blur-xl shadow-xs">
-        <div className="relative z-10 flex flex-col md:flex-row items-start md:items-center justify-between gap-6">
-          <div className="space-y-2.5 max-w-xl">
-            <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-indigo-50 border border-indigo-200 text-indigo-700 text-xs font-bold tracking-wide shadow-2xs">
-              <Sparkles className="w-3.5 h-3.5 text-indigo-600" /> Controle Total de Associações macOS
-            </div>
-            <h1 className="text-2xl font-bold tracking-tight text-slate-900 leading-tight">
-              Gerencie manipuladores de arquivos e URLs com velocidade nativa
-            </h1>
-            <p className="text-xs text-slate-600 font-normal leading-relaxed">
-              Interface visual avançada para o utilitário <strong className="text-indigo-600 font-semibold">dutix</strong>. Configure navegadores padrão, editores de código, associações em lote e migrações seguras.
-            </p>
-          </div>
-
-          <div className="flex flex-col sm:flex-row md:flex-col gap-2.5 w-full md:w-auto shrink-0">
-            <button
-              onClick={() => onNavigate('set')}
-              className="flex items-center justify-center gap-2 px-5 py-2.5 rounded-xl bg-indigo-600 hover:bg-indigo-700 text-white text-xs font-bold transition-all shadow-md shadow-indigo-600/20 cursor-pointer active:scale-[0.98]"
-            >
-              <Sparkles className="w-4 h-4" />
-              <span>Associação Rápida</span>
-            </button>
-            <button
-              onClick={() => onNavigate('presets')}
-              className="flex items-center justify-center gap-2 px-5 py-2.5 rounded-xl bg-white hover:bg-slate-50 text-slate-700 text-xs font-semibold border border-slate-200 transition-all cursor-pointer active:scale-[0.98] shadow-2xs"
-            >
-              <Compass className="w-3.5 h-3.5 text-indigo-600" />
-              <span>Aplicar Dotfiles / Preset</span>
-            </button>
-          </div>
+    <div className="app-page max-w-6xl mx-auto space-y-7 overflow-y-auto h-full">
+      <section className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 border-b border-slate-200 pb-6">
+        <div>
+          <h2 className="text-lg font-semibold tracking-tight text-slate-900">Configure suas associações</h2>
+          <p className="mt-1 text-sm text-slate-600">
+            Escolha um app para arquivos ou links e revise as mudanças antes de aplicar.
+          </p>
         </div>
-      </div>
-
-      {/* Metrics Row */}
-      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
-        {/* Apps Metric */}
-        <div
-          onClick={() => onNavigate('apps')}
-          className="p-5 rounded-2xl bg-white border border-slate-200/90 hover:border-indigo-400 hover:shadow-md transition-all duration-200 cursor-pointer group active:scale-[0.99] shadow-xs"
+        <button
+          type="button"
+          onClick={() => onNavigate('set')}
+          className="inline-flex shrink-0 items-center justify-center gap-2 rounded-xl bg-brand-600 px-4 py-2.5 text-sm font-semibold text-white transition-colors hover:bg-brand-700 focus-visible:outline-none"
         >
-          <div className="flex items-center justify-between text-slate-600 mb-3">
-            <span className="text-xs font-bold uppercase tracking-wider text-slate-500">Apps Instalados</span>
-            <div className="p-2 rounded-xl bg-indigo-50 text-indigo-600 group-hover:bg-indigo-100 transition-colors border border-indigo-100">
-              <Grid className="w-4 h-4" />
-            </div>
-          </div>
-          <div className="text-3xl font-bold text-slate-900 font-mono tracking-tight">{appCount}</div>
-          <div className="text-xs text-slate-500 mt-2 flex items-center gap-1 font-medium">
-            <span>Ver catálogo completo</span>
-            <ChevronRight className="w-3 h-3 group-hover:translate-x-0.5 transition-transform text-indigo-600" />
-          </div>
+          <Sparkles className="h-4 w-4" />
+          Nova associação
+        </button>
+      </section>
+
+      <section aria-label="Resumo do sistema" className="grid grid-cols-1 gap-3 sm:grid-cols-3">
+        <button type="button" onClick={() => onNavigate('apps')} className={metricClass} aria-label={appCount === null ? 'Contagem de aplicativos indisponível. Abrir catálogo' : `${appCount} aplicativos. Abrir catálogo`}>
+          <span className="flex items-center gap-2 text-sm font-medium text-slate-600">
+            <Grid className="h-4 w-4 text-brand-600" /> Aplicativos
+          </span>
+          <span className="mt-3 flex items-baseline justify-between">
+            <strong className="text-2xl font-semibold tabular-nums text-slate-900">{appCount ?? '—'}</strong>
+            <span className="inline-flex items-center gap-1 text-xs font-medium text-brand-700">
+              Abrir catálogo <ChevronRight className="h-3.5 w-3.5" />
+            </span>
+          </span>
+        </button>
+
+        <button type="button" onClick={() => onNavigate('targets')} className={metricClass} aria-label={targetCount === null ? 'Contagem de associações indisponível. Inspecionar alvos' : `${targetCount} associações. Inspecionar alvos`}>
+          <span className="flex items-center gap-2 text-sm font-medium text-slate-600">
+            <SearchCode className="h-4 w-4 text-brand-600" /> Associações detectadas
+          </span>
+          <span className="mt-3 flex items-baseline justify-between">
+            <strong className="text-2xl font-semibold tabular-nums text-slate-900">{targetCount ?? '—'}</strong>
+            <span className="inline-flex items-center gap-1 text-xs font-medium text-brand-700">
+              Inspecionar <ChevronRight className="h-3.5 w-3.5" />
+            </span>
+          </span>
+        </button>
+
+        <button type="button" onClick={() => onNavigate('targets')} className={metricClass} aria-label={conflictCount === null ? 'Contagem de conflitos indisponível. Abrir diagnóstico' : `${conflictCount} conflitos. Abrir diagnóstico`}>
+          <span className="flex items-center gap-2 text-sm font-medium text-slate-600">
+            {conflictCount === null ? <AlertTriangle className="h-4 w-4 text-slate-500" /> : conflictCount > 0 ? <AlertTriangle className="h-4 w-4 text-amber-700" /> : <CheckCircle2 className="h-4 w-4 text-emerald-700" />}
+            Diagnóstico
+          </span>
+          <span className="mt-3 flex items-baseline justify-between">
+            <strong className="text-2xl font-semibold tabular-nums text-slate-900">{conflictCount ?? '—'}</strong>
+            <span className={`text-xs font-medium ${conflictCount === null ? 'text-slate-600' : conflictCount > 0 ? 'text-amber-800' : 'text-emerald-800'}`}>
+              {conflictCount === null ? 'Indisponível' : conflictCount > 0 ? 'Ver conflitos' : 'Sem conflitos'}
+            </span>
+          </span>
+        </button>
+      </section>
+
+      <section className="space-y-3">
+        <div>
+          <h2 className="text-sm font-semibold text-slate-900">Atalhos de configuração</h2>
+          <p className="mt-1 text-xs text-slate-500">
+            Os atalhos preenchem o formulário; a prévia aparece antes de qualquer alteração.
+          </p>
         </div>
 
-        {/* Targets Metric */}
-        <div
-          onClick={() => onNavigate('targets')}
-          className="p-5 rounded-2xl bg-white border border-slate-200/90 hover:border-purple-400 hover:shadow-md transition-all duration-200 cursor-pointer group active:scale-[0.99] shadow-xs"
-        >
-          <div className="flex items-center justify-between text-slate-600 mb-3">
-            <span className="text-xs font-bold uppercase tracking-wider text-slate-500">Alvos & Extensões</span>
-            <div className="p-2 rounded-xl bg-purple-50 text-purple-600 group-hover:bg-purple-100 transition-colors border border-purple-100">
-              <SearchCode className="w-4 h-4" />
-            </div>
-          </div>
-          <div className="text-3xl font-bold text-slate-900 font-mono tracking-tight">{targetCount}</div>
-          <div className="text-xs text-slate-500 mt-2 flex items-center gap-1 font-medium">
-            <span>Inspecionar associações</span>
-            <ChevronRight className="w-3 h-3 group-hover:translate-x-0.5 transition-transform text-purple-600" />
-          </div>
-        </div>
-
-        {/* Conflicts / Diagnostic Metric */}
-        <div
-          onClick={() => onNavigate('targets')}
-          className="p-5 rounded-2xl bg-white border border-slate-200/90 hover:border-amber-400 hover:shadow-md transition-all duration-200 cursor-pointer group active:scale-[0.99] shadow-xs"
-        >
-          <div className="flex items-center justify-between text-slate-600 mb-3">
-            <span className="text-xs font-bold uppercase tracking-wider text-slate-500">Diagnóstico de Conflitos</span>
-            <div className={`p-2 rounded-xl border ${conflictCount > 0 ? 'bg-amber-50 text-amber-700 border-amber-200' : 'bg-emerald-50 text-emerald-700 border-emerald-200'}`}>
-              <AlertTriangle className="w-4 h-4" />
-            </div>
-          </div>
-          <div className="text-3xl font-bold text-slate-900 font-mono tracking-tight">{conflictCount}</div>
-          <div className="text-xs mt-2 font-semibold">
-            {conflictCount > 0 ? (
-              <span className="text-amber-700">Bundles órfãos detectados</span>
-            ) : (
-              <span className="text-emerald-700 flex items-center gap-1">
-                <CheckCircle2 className="w-3 h-3 inline" /> Sistema íntegro
-              </span>
-            )}
-          </div>
-        </div>
-
-        {/* Binary Status */}
-        <div
-          onClick={onOpenBinaryModal}
-          className="p-5 rounded-2xl bg-white border border-slate-200/90 hover:border-emerald-400 hover:shadow-md transition-all duration-200 cursor-pointer group active:scale-[0.99] shadow-xs"
-        >
-          <div className="flex items-center justify-between text-slate-600 mb-3">
-            <span className="text-xs font-bold uppercase tracking-wider text-slate-500">Binário Core</span>
-            <div className="p-2 rounded-xl bg-emerald-50 text-emerald-600 group-hover:bg-emerald-100 transition-colors border border-emerald-100">
-              <ShieldCheck className="w-4 h-4" />
-            </div>
-          </div>
-          <div className="text-2xl font-bold text-slate-900 font-mono tracking-tight truncate">
-            {binaryStatus?.installed ? `v${binaryStatus.version || '0.2.2'}` : 'Não Instalado'}
-          </div>
-          <div className="text-xs text-slate-500 mt-2 flex items-center gap-1 font-medium">
-            <span>Gerenciar e atualizar</span>
-            <ChevronRight className="w-3 h-3 group-hover:translate-x-0.5 transition-transform text-emerald-600" />
-          </div>
-        </div>
-      </div>
-
-      {/* Quick macOS Default Switchers */}
-      <div className="p-6 rounded-3xl bg-white border border-slate-200/90 space-y-4 shadow-xs">
-        <div className="flex items-center justify-between">
-          <div>
-            <h2 className="text-sm font-bold text-slate-900 flex items-center gap-2">
-              <Sparkles className="w-4 h-4 text-indigo-600" />
-              Troca Instantânea de Padrões Frequentes
-            </h2>
-            <p className="text-xs text-slate-500 mt-0.5 font-medium">Clique para alternar o manipulador padrão com 1 toque</p>
-          </div>
-        </div>
-
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-          {/* Default Browser Quick Switch */}
-          <div className="p-4 rounded-2xl bg-slate-50/80 border border-slate-200/70 space-y-3">
-            <div className="flex items-center gap-2 text-slate-800 font-bold text-xs">
-              <Compass className="w-4 h-4 text-sky-600" />
-              <span>Navegador Web (HTTP / HTTPS)</span>
-            </div>
-            <div className="grid grid-cols-2 gap-2 pt-1">
-              <button
-                onClick={() => onQuickSetDefault('Google Chrome', ['html', 'htm'], [], ['http', 'https'])}
-                className="px-3 py-2 rounded-xl bg-white hover:bg-sky-50 border border-slate-200 hover:border-sky-300 text-xs font-semibold text-slate-700 transition-all cursor-pointer text-center active:scale-[0.98] shadow-2xs"
-              >
-                Chrome
-              </button>
-              <button
-                onClick={() => onQuickSetDefault('Safari', ['html', 'htm'], [], ['http', 'https'])}
-                className="px-3 py-2 rounded-xl bg-white hover:bg-sky-50 border border-slate-200 hover:border-sky-300 text-xs font-semibold text-slate-700 transition-all cursor-pointer text-center active:scale-[0.98] shadow-2xs"
-              >
-                Safari
-              </button>
-            </div>
-          </div>
-
-          {/* Default Code Editor */}
-          <div className="p-4 rounded-2xl bg-slate-50/80 border border-slate-200/70 space-y-3">
-            <div className="flex items-center gap-2 text-slate-800 font-bold text-xs">
-              <Code2 className="w-4 h-4 text-emerald-600" />
-              <span>Editor de Código (.ts, .js, .json)</span>
-            </div>
-            <div className="grid grid-cols-2 gap-2 pt-1">
-              <button
-                onClick={() => onQuickSetDefault('Visual Studio Code', ['ts', 'tsx', 'js', 'jsx', 'json', 'py', 'go', 'md', 'yaml'], [], [])}
-                className="px-3 py-2 rounded-xl bg-white hover:bg-emerald-50 border border-slate-200 hover:border-emerald-300 text-xs font-semibold text-slate-700 transition-all cursor-pointer text-center active:scale-[0.98] shadow-2xs"
-              >
-                VS Code
-              </button>
-              <button
-                onClick={() => onQuickSetDefault('TextEdit', ['txt', 'rtf'], [], [])}
-                className="px-3 py-2 rounded-xl bg-white hover:bg-emerald-50 border border-slate-200 hover:border-emerald-300 text-xs font-semibold text-slate-700 transition-all cursor-pointer text-center active:scale-[0.98] shadow-2xs"
-              >
-                TextEdit
-              </button>
-            </div>
-          </div>
-
-          {/* Default PDF Viewer */}
-          <div className="p-4 rounded-2xl bg-slate-50/80 border border-slate-200/70 space-y-3">
-            <div className="flex items-center gap-2 text-slate-800 font-bold text-xs">
-              <FileText className="w-4 h-4 text-rose-600" />
-              <span>Leitor de Documentos (.pdf)</span>
-            </div>
-            <div className="grid grid-cols-2 gap-2 pt-1">
-              <button
-                onClick={() => onQuickSetDefault('Preview', ['pdf'], ['com.adobe.pdf'], [])}
-                className="px-3 py-2 rounded-xl bg-white hover:bg-rose-50 border border-slate-200 hover:border-rose-300 text-xs font-semibold text-slate-700 transition-all cursor-pointer text-center active:scale-[0.98] shadow-2xs"
-              >
-                Preview (Apple)
-              </button>
-              <button
-                onClick={() => onQuickSetDefault('Google Chrome', ['pdf'], ['com.adobe.pdf'], [])}
-                className="px-3 py-2 rounded-xl bg-white hover:bg-rose-50 border border-slate-200 hover:border-rose-300 text-xs font-semibold text-slate-700 transition-all cursor-pointer text-center active:scale-[0.98] shadow-2xs"
-              >
-                Chrome PDF
-              </button>
-            </div>
-          </div>
-        </div>
-      </div>
-
-      {/* Quick Navigation Cards */}
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-        <div
-          onClick={() => onNavigate('migrate')}
-          className="p-6 rounded-3xl bg-white border border-slate-200/90 hover:border-purple-400 hover:shadow-md transition-all duration-200 cursor-pointer group flex items-start gap-4 active:scale-[0.99] shadow-xs"
-        >
-          <div className="p-3 rounded-2xl bg-purple-50 text-purple-600 group-hover:bg-purple-100 transition-colors border border-purple-100 shrink-0">
-            <ArrowRightLeft className="w-6 h-6" />
-          </div>
-          <div>
-            <h3 className="text-sm font-bold text-slate-900 group-hover:text-purple-700 transition-colors">
-              Migração Completa entre Apps
+        <div className="grid grid-cols-1 gap-3 md:grid-cols-3">
+          <div className="rounded-2xl border border-slate-200 bg-white p-4">
+            <h3 className="mb-3 flex items-center gap-2 text-sm font-semibold text-slate-800">
+              <Compass className="h-4 w-4 text-brand-600" /> Navegador
             </h3>
-            <p className="text-xs text-slate-600 mt-1 leading-relaxed font-normal">
-              Transfira todas as associações de um aplicativo antigo para um novo automaticamente (ex: TextEdit → VS Code, Safari → Chrome).
-            </p>
+            <div className="grid grid-cols-2 gap-2">
+              <button type="button" onClick={() => onQuickSetDefault('Google Chrome', ['html', 'htm'], [], ['http', 'https'])} className={shortcutClass}>
+                Chrome <ChevronRight className="h-3.5 w-3.5" />
+              </button>
+              <button type="button" onClick={() => onQuickSetDefault('Safari', ['html', 'htm'], [], ['http', 'https'])} className={shortcutClass}>
+                Safari <ChevronRight className="h-3.5 w-3.5" />
+              </button>
+            </div>
           </div>
-        </div>
 
-        <div
-          onClick={() => onNavigate('snapshots')}
-          className="p-6 rounded-3xl bg-white border border-slate-200/90 hover:border-indigo-400 hover:shadow-md transition-all duration-200 cursor-pointer group flex items-start gap-4 active:scale-[0.99] shadow-xs"
-        >
-          <div className="p-3 rounded-2xl bg-indigo-50 text-indigo-600 group-hover:bg-indigo-100 transition-colors border border-indigo-100 shrink-0">
-            <History className="w-6 h-6" />
-          </div>
-          <div>
-            <h3 className="text-sm font-bold text-slate-900 group-hover:text-indigo-700 transition-colors">
-              Histórico & Rollback Automático
+          <div className="rounded-2xl border border-slate-200 bg-white p-4">
+            <h3 className="mb-3 flex items-center gap-2 text-sm font-semibold text-slate-800">
+              <Code2 className="h-4 w-4 text-brand-600" /> Código e texto
             </h3>
-            <p className="text-xs text-slate-600 mt-1 leading-relaxed font-normal">
-              {recentSnapshots.length > 0
-                ? `${recentSnapshots.length} snapshots salvos. Restaure o estado do sistema a qualquer momento.`
-                : 'Snapshots de segurança são gerados antes de qualquer modificação em lote.'}
-            </p>
+            <div className="grid grid-cols-2 gap-2">
+              <button type="button" onClick={() => onQuickSetDefault('Visual Studio Code', ['ts', 'tsx', 'js', 'jsx', 'json', 'py', 'go', 'md', 'yaml'], [], [])} className={shortcutClass}>
+                VS Code <ChevronRight className="h-3.5 w-3.5" />
+              </button>
+              <button type="button" onClick={() => onQuickSetDefault('TextEdit', ['txt', 'rtf'], [], [])} className={shortcutClass}>
+                TextEdit <ChevronRight className="h-3.5 w-3.5" />
+              </button>
+            </div>
+          </div>
+
+          <div className="rounded-2xl border border-slate-200 bg-white p-4">
+            <h3 className="mb-3 flex items-center gap-2 text-sm font-semibold text-slate-800">
+              <FileText className="h-4 w-4 text-brand-600" /> PDFs
+            </h3>
+            <div className="grid grid-cols-2 gap-2">
+              <button type="button" onClick={() => onQuickSetDefault('Preview', ['pdf'], ['com.adobe.pdf'], [])} className={shortcutClass}>
+                Preview <ChevronRight className="h-3.5 w-3.5" />
+              </button>
+              <button type="button" onClick={() => onQuickSetDefault('Google Chrome', ['pdf'], ['com.adobe.pdf'], [])} className={shortcutClass}>
+                Chrome <ChevronRight className="h-3.5 w-3.5" />
+              </button>
+            </div>
           </div>
         </div>
-      </div>
+      </section>
     </div>
   )
 }

@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react'
+import React, { useState, useEffect, useRef } from 'react'
 import {
   ArrowRightLeft,
   Search,
@@ -18,12 +18,14 @@ import { DryRunPreviewModal } from '../set/DryRunPreviewModal'
 
 interface MigrationViewProps {
   apps: dutix.AppInfo[]
+  appsLoadFailed: boolean
   initialSourceApp?: string | null
   onSuccess: () => void
 }
 
 export const MigrationView: React.FC<MigrationViewProps> = ({
   apps,
+  appsLoadFailed,
   initialSourceApp,
   onSuccess
 }) => {
@@ -33,6 +35,8 @@ export const MigrationView: React.FC<MigrationViewProps> = ({
   const [toSearch, setToSearch] = useState('')
   const [fromOpen, setFromOpen] = useState(false)
   const [toOpen, setToOpen] = useState(false)
+  const fromTriggerRef = useRef<HTMLButtonElement>(null)
+  const toTriggerRef = useRef<HTMLButtonElement>(null)
 
   const [dryRunResult, setDryRunResult] = useState<dutix.DryRunResult | null>(null)
   const [analyzing, setAnalyzing] = useState(false)
@@ -51,11 +55,20 @@ export const MigrationView: React.FC<MigrationViewProps> = ({
     (a) => a.name !== fromApp && a.name.toLowerCase().includes(toSearch.toLowerCase())
   )
 
-  const handleAnalyzeMigration = async () => {
+  const validateApps = () => {
     if (!fromApp || !toApp) {
       setAlert({ type: 'error', message: 'Selecione o aplicativo de origem e o de destino.' })
-      return
+      return false
     }
+    if (fromApp === toApp) {
+      setAlert({ type: 'error', message: 'Escolha aplicativos diferentes para origem e destino.' })
+      return false
+    }
+    return true
+  }
+
+  const handleAnalyzeMigration = async () => {
+    if (!validateApps()) return
 
     setAnalyzing(true)
     setAlert(null)
@@ -72,7 +85,7 @@ export const MigrationView: React.FC<MigrationViewProps> = ({
   }
 
   const handleExecuteMigration = async () => {
-    if (!fromApp || !toApp) return
+    if (!validateApps()) return
     setMigrating(true)
     setAlert(null)
 
@@ -81,7 +94,7 @@ export const MigrationView: React.FC<MigrationViewProps> = ({
       setModalOpen(false)
       setAlert({
         type: 'success',
-        message: `Migração de '${fromApp}' para '${toApp}' executada com sucesso! Snapshot de segurança criado.`
+        message: `Migração de '${fromApp}' para '${toApp}' concluída com sucesso.`
       })
       onSuccess()
     } catch (e: any) {
@@ -104,6 +117,8 @@ export const MigrationView: React.FC<MigrationViewProps> = ({
       {/* Alert Banner */}
       {alert && (
         <div
+          role={alert.type === 'error' ? 'alert' : 'status'}
+          aria-atomic="true"
           className={`p-4 rounded-2xl border text-xs flex items-center justify-between font-medium ${
             alert.type === 'success'
               ? 'bg-emerald-50 border-emerald-200 text-emerald-800'
@@ -118,8 +133,8 @@ export const MigrationView: React.FC<MigrationViewProps> = ({
             )}
             <span>{alert.message}</span>
           </div>
-          <button onClick={() => setAlert(null)} className="text-slate-500 hover:text-slate-800 cursor-pointer">
-            <X className="w-4 h-4" />
+          <button type="button" onClick={() => setAlert(null)} aria-label="Fechar aviso" className="text-slate-500 hover:text-slate-800 cursor-pointer">
+            <X className="w-4 h-4" aria-hidden="true" />
           </button>
         </div>
       )}
@@ -136,52 +151,69 @@ export const MigrationView: React.FC<MigrationViewProps> = ({
           </div>
 
           <div className="relative">
-            <div
+            <button
+              ref={fromTriggerRef}
+              type="button"
               onClick={() => setFromOpen(!fromOpen)}
-              className="w-full p-4 bg-slate-50 border border-slate-200 hover:border-purple-400 rounded-2xl flex items-center justify-between cursor-pointer transition-colors shadow-2xs"
+              aria-label="Selecionar aplicativo de origem"
+              aria-expanded={fromOpen}
+              aria-controls={fromOpen ? 'migration-source-options' : undefined}
+              className="w-full p-4 bg-slate-50 border border-slate-200 hover:border-purple-400 rounded-2xl flex items-center justify-between cursor-pointer transition-colors shadow-2xs text-left"
             >
               {fromApp ? (
-                <div className="flex items-center gap-3">
-                  <div className="w-10 h-10 rounded-xl bg-purple-50 border border-purple-200 flex items-center justify-center text-purple-700 font-bold text-sm shadow-2xs">
-                    {fromApp.charAt(0).toUpperCase()}
-                  </div>
-                  <div>
-                    <div className="font-bold text-slate-900 text-sm">{fromApp}</div>
-                    <div className="text-[10px] text-slate-500 font-mono">
+                <span className="flex min-w-0 items-center gap-3">
+                  <span className="w-10 h-10 rounded-xl bg-purple-50 border border-purple-200 flex items-center justify-center text-purple-700 font-bold text-sm shadow-2xs shrink-0">
+                    {Array.from(fromApp)[0]?.toUpperCase()}
+                  </span>
+                  <span className="min-w-0">
+                    <span className="block truncate font-bold text-slate-900 text-sm">{fromApp}</span>
+                    <span className="block truncate text-[10px] text-slate-500 font-mono">
                       {apps.find((a) => a.name === fromApp)?.bundle_id || 'App de Origem'}
-                    </div>
-                  </div>
-                </div>
+                    </span>
+                  </span>
+                </span>
               ) : (
-                <span className="text-slate-400 text-xs font-medium">Selecione o app de origem...</span>
+                <span className="text-slate-500 text-xs font-medium">Selecione o app de origem...</span>
               )}
-              <Search className="w-4 h-4 text-slate-400" />
-            </div>
+              <Search className="w-4 h-4 text-slate-500 shrink-0" aria-hidden="true" />
+            </button>
 
             {fromOpen && (
-              <div className="absolute left-0 right-0 top-full mt-2 z-30 bg-white border border-slate-200 rounded-2xl shadow-xl overflow-hidden max-h-64 flex flex-col">
+              <div id="migration-source-options" role="group" aria-label="Aplicativos de origem" className="absolute left-0 right-0 top-full mt-2 z-30 bg-white border border-slate-200 rounded-2xl shadow-xl overflow-hidden max-h-64 flex flex-col">
                 <div className="p-3 border-b border-slate-200">
                   <input
                     type="text"
+                    aria-label="Pesquisar aplicativo de origem"
                     placeholder="Pesquisar aplicativo de origem..."
                     value={fromSearch}
                     onChange={(e) => setFromSearch(e.target.value)}
+                    onKeyDown={(e) => {
+                      if (e.key === 'Escape') {
+                        setFromOpen(false)
+                        fromTriggerRef.current?.focus()
+                      }
+                    }}
                     autoFocus
                     className="w-full px-3 py-1.5 bg-slate-50 border border-slate-200 rounded-xl text-xs text-slate-800 focus:border-purple-500 font-medium"
                   />
                 </div>
                 <div className="flex-1 overflow-y-auto p-2 space-y-1">
+                  {filteredFromApps.length === 0 && <p role="status" className="p-3 text-xs text-slate-500">{appsLoadFailed ? 'Não foi possível carregar os aplicativos. Tente atualizar os dados.' : 'Nenhum aplicativo encontrado.'}</p>}
                   {filteredFromApps.map((a) => (
                     <button
                       key={a.bundle_id || a.name}
+                      type="button"
+                      aria-pressed={fromApp === a.name}
                       onClick={() => {
                         setFromApp(a.name)
+                        if (toApp === a.name) setToApp('')
                         setFromOpen(false)
+                        fromTriggerRef.current?.focus()
                       }}
                       className="w-full text-left p-2 rounded-xl hover:bg-slate-100 flex items-center gap-3 text-xs text-slate-800 transition-colors cursor-pointer active:scale-[0.99]"
                     >
                       <div className="w-6 h-6 rounded-lg bg-purple-50 border border-purple-200 flex items-center justify-center text-purple-700 text-xs font-bold shrink-0">
-                        {a.name.charAt(0).toUpperCase()}
+                        {Array.from(a.name)[0]?.toUpperCase()}
                       </div>
                       <div className="min-w-0 flex-1">
                         <div className="font-bold truncate">{a.name}</div>
@@ -198,7 +230,7 @@ export const MigrationView: React.FC<MigrationViewProps> = ({
 
         {/* Arrow Divider */}
         <div className="lg:col-span-1 flex justify-center">
-          <div className="w-10 h-10 rounded-full bg-slate-100 border border-slate-200 flex items-center justify-center text-indigo-600 shadow-2xs">
+          <div className="w-10 h-10 rounded-full bg-slate-100 border border-slate-200 flex items-center justify-center text-brand-600 shadow-2xs">
             <ArrowRightLeft className="w-5 h-5" />
           </div>
         </div>
@@ -213,52 +245,68 @@ export const MigrationView: React.FC<MigrationViewProps> = ({
           </div>
 
           <div className="relative">
-            <div
+            <button
+              ref={toTriggerRef}
+              type="button"
               onClick={() => setToOpen(!toOpen)}
-              className="w-full p-4 bg-slate-50 border border-slate-200 hover:border-emerald-400 rounded-2xl flex items-center justify-between cursor-pointer transition-colors shadow-2xs"
+              aria-label="Selecionar aplicativo de destino"
+              aria-expanded={toOpen}
+              aria-controls={toOpen ? 'migration-destination-options' : undefined}
+              className="w-full p-4 bg-slate-50 border border-slate-200 hover:border-emerald-400 rounded-2xl flex items-center justify-between cursor-pointer transition-colors shadow-2xs text-left"
             >
               {toApp ? (
-                <div className="flex items-center gap-3">
-                  <div className="w-10 h-10 rounded-xl bg-emerald-50 border border-emerald-200 flex items-center justify-center text-emerald-700 font-bold text-sm shadow-2xs">
-                    {toApp.charAt(0).toUpperCase()}
-                  </div>
-                  <div>
-                    <div className="font-bold text-slate-900 text-sm">{toApp}</div>
-                    <div className="text-[10px] text-slate-500 font-mono">
+                <span className="flex min-w-0 items-center gap-3">
+                  <span className="w-10 h-10 rounded-xl bg-emerald-50 border border-emerald-200 flex items-center justify-center text-emerald-700 font-bold text-sm shadow-2xs shrink-0">
+                    {Array.from(toApp)[0]?.toUpperCase()}
+                  </span>
+                  <span className="min-w-0">
+                    <span className="block truncate font-bold text-slate-900 text-sm">{toApp}</span>
+                    <span className="block truncate text-[10px] text-slate-500 font-mono">
                       {apps.find((a) => a.name === toApp)?.bundle_id || 'App de Destino'}
-                    </div>
-                  </div>
-                </div>
+                    </span>
+                  </span>
+                </span>
               ) : (
-                <span className="text-slate-400 text-xs font-medium">Selecione o app de destino...</span>
+                <span className="text-slate-500 text-xs font-medium">Selecione o app de destino...</span>
               )}
-              <Search className="w-4 h-4 text-slate-400" />
-            </div>
+              <Search className="w-4 h-4 text-slate-500 shrink-0" aria-hidden="true" />
+            </button>
 
             {toOpen && (
-              <div className="absolute left-0 right-0 top-full mt-2 z-30 bg-white border border-slate-200 rounded-2xl shadow-xl overflow-hidden max-h-64 flex flex-col">
+              <div id="migration-destination-options" role="group" aria-label="Aplicativos de destino" className="absolute left-0 right-0 top-full mt-2 z-30 bg-white border border-slate-200 rounded-2xl shadow-xl overflow-hidden max-h-64 flex flex-col">
                 <div className="p-3 border-b border-slate-200">
                   <input
                     type="text"
+                    aria-label="Pesquisar aplicativo de destino"
                     placeholder="Pesquisar aplicativo de destino..."
                     value={toSearch}
                     onChange={(e) => setToSearch(e.target.value)}
+                    onKeyDown={(e) => {
+                      if (e.key === 'Escape') {
+                        setToOpen(false)
+                        toTriggerRef.current?.focus()
+                      }
+                    }}
                     autoFocus
                     className="w-full px-3 py-1.5 bg-slate-50 border border-slate-200 rounded-xl text-xs text-slate-800 focus:border-emerald-500 font-medium"
                   />
                 </div>
                 <div className="flex-1 overflow-y-auto p-2 space-y-1">
+                  {filteredToApps.length === 0 && <p role="status" className="p-3 text-xs text-slate-500">{appsLoadFailed ? 'Não foi possível carregar os aplicativos. Tente atualizar os dados.' : 'Nenhum aplicativo encontrado.'}</p>}
                   {filteredToApps.map((a) => (
                     <button
                       key={a.bundle_id || a.name}
+                      type="button"
+                      aria-pressed={toApp === a.name}
                       onClick={() => {
                         setToApp(a.name)
                         setToOpen(false)
+                        toTriggerRef.current?.focus()
                       }}
                       className="w-full text-left p-2 rounded-xl hover:bg-slate-100 flex items-center gap-3 text-xs text-slate-800 transition-colors cursor-pointer active:scale-[0.99]"
                     >
                       <div className="w-6 h-6 rounded-lg bg-emerald-50 border border-emerald-200 flex items-center justify-center text-emerald-700 text-xs font-bold shrink-0">
-                        {a.name.charAt(0).toUpperCase()}
+                        {Array.from(a.name)[0]?.toUpperCase()}
                       </div>
                       <div className="min-w-0 flex-1">
                         <div className="font-bold truncate">{a.name}</div>
@@ -283,9 +331,9 @@ export const MigrationView: React.FC<MigrationViewProps> = ({
               setFromApp('TextEdit')
               setToApp('Visual Studio Code')
             }}
-            className="p-3.5 rounded-2xl bg-white border border-slate-200 hover:border-indigo-400 hover:shadow-sm text-left transition-all cursor-pointer group active:scale-[0.98] shadow-2xs"
+            className="p-3.5 rounded-2xl bg-white border border-slate-200 hover:border-brand-400 hover:shadow-sm text-left transition-all cursor-pointer group active:scale-[0.98] shadow-2xs"
           >
-            <div className="font-bold text-xs text-slate-900 group-hover:text-indigo-600">
+            <div className="font-bold text-xs text-slate-900 group-hover:text-brand-600">
               TextEdit → VS Code
             </div>
             <div className="text-[10px] text-slate-500 mt-0.5 font-medium">Arquivos de texto puro, markdown e código</div>
@@ -296,9 +344,9 @@ export const MigrationView: React.FC<MigrationViewProps> = ({
               setFromApp('Safari')
               setToApp('Google Chrome')
             }}
-            className="p-3.5 rounded-2xl bg-white border border-slate-200 hover:border-indigo-400 hover:shadow-sm text-left transition-all cursor-pointer group active:scale-[0.98] shadow-2xs"
+            className="p-3.5 rounded-2xl bg-white border border-slate-200 hover:border-brand-400 hover:shadow-sm text-left transition-all cursor-pointer group active:scale-[0.98] shadow-2xs"
           >
-            <div className="font-bold text-xs text-slate-900 group-hover:text-indigo-600">
+            <div className="font-bold text-xs text-slate-900 group-hover:text-brand-600">
               Safari → Google Chrome
             </div>
             <div className="text-[10px] text-slate-500 mt-0.5 font-medium">Documentos web, HTTP/HTTPS e bookmarks</div>
@@ -309,9 +357,9 @@ export const MigrationView: React.FC<MigrationViewProps> = ({
               setFromApp('QuickTime Player')
               setToApp('VLC')
             }}
-            className="p-3.5 rounded-2xl bg-white border border-slate-200 hover:border-indigo-400 hover:shadow-sm text-left transition-all cursor-pointer group active:scale-[0.98] shadow-2xs"
+            className="p-3.5 rounded-2xl bg-white border border-slate-200 hover:border-brand-400 hover:shadow-sm text-left transition-all cursor-pointer group active:scale-[0.98] shadow-2xs"
           >
-            <div className="font-bold text-xs text-slate-900 group-hover:text-indigo-600">
+            <div className="font-bold text-xs text-slate-900 group-hover:text-brand-600">
               QuickTime → VLC
             </div>
             <div className="text-[10px] text-slate-500 mt-0.5 font-medium">Vídeos, áudios e containers de mídia</div>
@@ -329,15 +377,15 @@ export const MigrationView: React.FC<MigrationViewProps> = ({
         <div className="flex items-center gap-3 w-full sm:w-auto justify-end">
           <button
             onClick={handleAnalyzeMigration}
-            disabled={analyzing || !fromApp || !toApp}
-            className="flex items-center gap-2 px-6 py-2.5 rounded-xl bg-indigo-600 hover:bg-indigo-700 text-white text-xs font-bold transition-all shadow-md shadow-indigo-600/20 disabled:opacity-50 cursor-pointer active:scale-[0.98]"
+            disabled={analyzing || !fromApp || !toApp || fromApp === toApp}
+            className="flex items-center gap-2 px-6 py-2.5 rounded-xl bg-brand-600 hover:bg-brand-700 text-white text-xs font-bold transition-all shadow-md shadow-brand-600/20 disabled:opacity-50 cursor-pointer active:scale-[0.98]"
           >
             {analyzing ? (
               <div className="w-3.5 h-3.5 border-2 border-white border-t-transparent rounded-full animate-spin" />
             ) : (
               <Clock className="w-4 h-4" />
             )}
-            <span>Analisar Plano de Migração (--dry-run)</span>
+            <span>Revisar migração</span>
           </button>
         </div>
       </div>
