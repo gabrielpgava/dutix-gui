@@ -5,7 +5,9 @@
     --app-region: drag;
     --ease-spring: cubic-bezier(0.16, 1, 0.3, 1);
 
-    /* --- Impeccable macOS Light Platinum Semantic Color System --- */
+    color-scheme: light dark;
+
+    /* --- System-adaptive macOS Aqua semantic colors --- */
     --color-canvas: #f8fafc;
     --color-canvas-subtle: #f1f5f9;
     --color-surface-card: rgba(255, 255, 255, 0.85);
@@ -54,8 +56,8 @@
   }
 
   body {
-    background-color: #f8fafc;
-    color: #0f172a;
+    background-color: var(--color-canvas);
+    color: var(--color-text-primary);
     font-family: -apple-system, BlinkMacSystemFont, "SF Pro Display", "SF Pro Text", system-ui, sans-serif;
     -webkit-font-smoothing: antialiased;
     -moz-osx-font-smoothing: grayscale;
@@ -69,11 +71,21 @@
   select:focus-visible,
   [tabindex]:focus-visible {
     outline: none;
-    box-shadow: 0 0 0 2px #6366f1, 0 0 0 4px rgba(99, 102, 241, 0.2);
+    box-shadow: 0 0 0 2px var(--color-border-focus), 0 0 0 4px var(--color-accent-primary-glow);
   }
 }
 
-/* Custom macOS-grade scrollbars for light theme */
+::selection {
+  background: var(--color-accent-primary-subtle);
+  color: var(--color-text-primary);
+}
+
+input,
+textarea {
+  caret-color: var(--color-accent-primary);
+}
+
+/* Custom macOS-grade scrollbars */
 ::-webkit-scrollbar {
   width: 6px;
   height: 6px;
@@ -82,12 +94,12 @@
   background: transparent;
 }
 ::-webkit-scrollbar-thumb {
-  background: rgba(148, 163, 184, 0.35);
+  background: var(--color-border-default);
   border-radius: 9999px;
   transition: background 0.2s ease;
 }
 ::-webkit-scrollbar-thumb:hover {
-  background: rgba(100, 116, 139, 0.6);
+  background: var(--color-text-dim);
 }
 
 .window-drag-region {
@@ -297,8 +309,173 @@
 
 
 @theme {
+  --color-slate-50: var(--color-canvas);
+  --color-slate-100: var(--color-canvas-subtle);
+  --color-slate-200: #e2e8f0;
+  --color-slate-300: #cbd5e1;
+  --color-slate-400: #94a3b8;
   --color-slate-500: var(--color-text-muted);
+  --color-slate-600: #475569;
+  --color-slate-700: #334155;
+  --color-slate-800: #1e293b;
+  --color-slate-900: var(--color-text-primary);
   --color-emerald-600: var(--color-success);
   --color-amber-600: var(--color-warning);
   --color-rose-600: var(--color-danger);
+}
+
+@media (prefers-color-scheme: dark) {
+  :root {
+    color-scheme: dark;
+
+    --color-canvas: #0d131a;
+    --color-canvas-subtle: #131c25;
+    --color-surface-card: rgba(25, 35, 45, 0.96);
+    --color-surface-card-hover: rgba(34, 47, 60, 0.98);
+    --color-surface-elevated: #1b2732;
+    --color-surface-overlay: rgba(4, 10, 17, 0.76);
+
+    --color-border-subtle: rgba(148, 163, 184, 0.14);
+    --color-border-default: rgba(148, 163, 184, 0.26);
+    --color-border-hover: rgba(90, 198, 208, 0.5);
+    --color-border-focus: #5ac6d0;
+
+    --color-text-primary: #f1f5f9;
+    --color-text-secondary: #cbd5df;
+    --color-text-muted: #aebbc8;
+    --color-text-dim: #8293a2;
+
+    --color-accent-primary: #5ac6d0;
+    --color-accent-primary-hover: #86e1e8;
+    --color-accent-primary-subtle: rgba(90, 198, 208, 0.18);
+    --color-accent-primary-glow: rgba(90, 198, 208, 0.24);
+
+    --color-success: #56d695;
+    --color-success-subtle: rgba(52, 211, 153, 0.14);
+    --color-success-border: rgba(74, 222, 128, 0.28);
+    --color-warning: #f2bf59;
+    --color-warning-subtle: rgba(245, 158, 11, 0.15);
+    --color-warning-border: rgba(245, 158, 11, 0.3);
+    --color-danger: #fb879b;
+    --color-danger-subtle: rgba(244, 63, 94, 0.15);
+    --color-danger-border: rgba(244, 63, 94, 0.3);
+    --color-info: #5bbbe9;
+    --color-info-subtle: rgba(14, 165, 233, 0.15);
+
+    --shadow-card-subtle: 0 1px 3px 0 rgba(0, 0, 0, 0.28), 0 1px 2px -1px rgba(0, 0, 0, 0.24);
+    --shadow-card-elevated: 0 10px 25px -5px rgba(0, 0, 0, 0.32), 0 8px 10px -6px rgba(0, 0, 0, 0.24);
+    --shadow-glow-primary: 0 0 20px -2px rgba(90, 198, 208, 0.2);
+
+    --color-slate-50: var(--color-canvas);
+    --color-slate-100: var(--color-canvas-subtle);
+    --color-slate-200: #293743;
+    --color-slate-300: #3c4b58;
+    --color-slate-400: #8293a2;
+    --color-slate-500: var(--color-text-muted);
+    --color-slate-600: #c2ced8;
+    --color-slate-700: #d5dee7;
+    --color-slate-800: #e7edf3;
+    --color-slate-900: #f1f5f9;
+
+    --color-brand-50: #11252b;
+    --color-brand-100: #15343d;
+    --color-brand-200: #20505c;
+    --color-brand-300: #317887;
+    --color-brand-400: #4ab1bc;
+    --color-brand-500: #51c6d0;
+    --color-brand-600: #69d1da;
+    --color-brand-700: #8ce2e9;
+    --color-brand-800: #b1eef2;
+    --color-brand-900: #d5f7fa;
+    --color-brand-950: #ecfeff;
+
+    --color-indigo-50: #201b39;
+    --color-indigo-100: #2c2750;
+    --color-indigo-200: #3e3971;
+    --color-indigo-300: #55509a;
+    --color-indigo-400: #6963b7;
+    --color-indigo-500: #4f46e5;
+    --color-indigo-600: #4338ca;
+    --color-indigo-700: #3730a3;
+    --color-indigo-800: #312e81;
+    --color-indigo-900: #1e1b4b;
+    --color-indigo-950: #17143b;
+
+    --color-emerald-50: #10271b;
+    --color-emerald-100: #153623;
+    --color-emerald-200: #21513b;
+    --color-emerald-300: #2f7853;
+    --color-emerald-400: #63dc99;
+    --color-emerald-500: #44d48b;
+    --color-emerald-600: var(--color-success);
+    --color-emerald-700: #86efac;
+    --color-emerald-800: #bbf7d0;
+    --color-emerald-900: #dcfce7;
+
+    --color-amber-50: #2a2111;
+    --color-amber-100: #3b2c12;
+    --color-amber-200: #5a4218;
+    --color-amber-300: #7a5b23;
+    --color-amber-400: #facc15;
+    --color-amber-500: #fbbf24;
+    --color-amber-600: var(--color-warning);
+    --color-amber-700: #fcd34d;
+    --color-amber-800: #fde68a;
+    --color-amber-900: #fef3c7;
+
+    --color-rose-50: #2b1419;
+    --color-rose-100: #3d1b23;
+    --color-rose-200: #602835;
+    --color-rose-300: #85364b;
+    --color-rose-400: #fda4af;
+    --color-rose-500: #fb7185;
+    --color-rose-600: var(--color-danger);
+    --color-rose-700: #fecdd3;
+    --color-rose-800: #ffe4e6;
+    --color-rose-900: #fff1f2;
+
+    --color-purple-50: #261d31;
+    --color-purple-100: #342745;
+    --color-purple-200: #4a3762;
+    --color-purple-300: #664d85;
+    --color-purple-400: #a78bfa;
+    --color-purple-500: #c4b5fd;
+    --color-purple-600: #d8b4fe;
+    --color-purple-700: #e9d5ff;
+
+    --color-sky-50: #102632;
+    --color-sky-100: #163745;
+    --color-sky-200: #20556b;
+    --color-sky-300: #2d718d;
+    --color-sky-400: #5dc1e9;
+    --color-sky-500: #38bdf8;
+    --color-sky-600: #7dd3fc;
+    --color-sky-700: #bae6fd;
+  }
+
+  .bg-white { background-color: var(--color-surface-elevated); }
+  [class~="bg-white/80"] { background-color: var(--color-surface-card); }
+  .bg-slate-900 { background-color: #0f172a; }
+  .border-slate-800 { border-color: #334155; }
+  .text-slate-300 { color: #cbd5e1; }
+  .text-slate-100 { color: #f1f5f9; }
+
+  [class~="text-indigo-500"] { color: #818cf8; }
+  [class~="text-indigo-600"],
+  [class~="hover:text-indigo-600"]:hover,
+  .group:hover [class~="group-hover:text-indigo-600"] { color: #a5b4fc; }
+  [class~="text-indigo-700"],
+  [class~="hover:text-indigo-700"]:hover,
+  .group:hover [class~="group-hover:text-indigo-700"] { color: #c7d2fe; }
+  [class~="text-indigo-800"],
+  [class~="hover:text-indigo-800"]:hover { color: #e0e7ff; }
+  [class~="text-indigo-900"],
+  [class~="text-indigo-950"] { color: #eef2ff; }
+
+  .bg-brand-600 { background-color: #0e5968; }
+  .bg-brand-700 { background-color: #0c4553; }
+  .bg-emerald-600 { background-color: #17633b; }
+  .bg-emerald-700 { background-color: #14532d; }
+  .bg-amber-600 { background-color: #7c4a03; }
+  .bg-sky-600 { background-color: #075985; }
 }

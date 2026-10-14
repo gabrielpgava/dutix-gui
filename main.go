@@ -26,14 +26,13 @@ func main() {
 		AssetServer: &assetserver.Options{
 			Assets: assets,
 		},
-		BackgroundColour: &options.RGBA{R: 15, G: 23, B: 42, A: 255}, // slate-900
 		OnStartup:        app.startup,
 		Bind: []interface{}{
 			app,
 		},
 		Mac: &mac.Options{
 			TitleBar:             mac.TitleBarHiddenInset(),
-			Appearance:           mac.NSAppearanceNameDarkAqua,
+			Appearance:           mac.DefaultAppearance,
 			WebviewIsTransparent: false,
 			WindowIsTranslucent:  false,
 			About: &mac.AboutInfo{
