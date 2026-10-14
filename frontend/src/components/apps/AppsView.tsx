@@ -186,10 +186,10 @@ export const AppsView: React.FC<AppsViewProps> = ({
                       </div>
                       <span className="truncate">{app.name}</span>
                     </td>
-                    <td className="px-6 py-3.5 font-mono text-xs text-indigo-600 font-semibold truncate max-w-xs">
+                    <td className="px-6 py-3.5 font-mono text-xs text-indigo-600 font-semibold truncate max-w-xs select-text">
                       {app.bundle_id}
                     </td>
-                    <td className="px-6 py-3.5 font-mono text-xs text-slate-500 truncate max-w-sm">
+                    <td className="px-6 py-3.5 font-mono text-xs text-slate-500 truncate max-w-sm select-text">
                       {app.path}
                     </td>
                     <td className="px-6 py-3.5 text-right">

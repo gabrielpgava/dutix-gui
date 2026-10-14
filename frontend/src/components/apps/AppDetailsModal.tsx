@@ -98,7 +98,7 @@ export const AppDetailsModal: React.FC<AppDetailsModalProps> = ({
             </div>
             <div>
               <h2 className="text-lg font-bold text-slate-900 tracking-tight">{appName}</h2>
-              <p className="text-xs text-slate-500 font-mono">
+              <p className="text-xs text-slate-500 font-mono select-text">
                 {detail?.app?.bundle_id || 'Carregando...'}
               </p>
             </div>
@@ -136,7 +136,7 @@ export const AppDetailsModal: React.FC<AppDetailsModalProps> = ({
                     <span>{copied ? 'Copiado' : 'Copiar Caminho'}</span>
                   </button>
                 </div>
-                <code className="text-xs font-mono text-slate-800 block break-all bg-white p-2.5 rounded-xl border border-slate-200">
+                <code className="text-xs font-mono text-slate-800 block break-all bg-white p-2.5 rounded-xl border border-slate-200 select-text">
                   {detail?.app?.path}
                 </code>
               </div>
@@ -195,7 +195,7 @@ export const AppDetailsModal: React.FC<AppDetailsModalProps> = ({
                     filteredExtensions.map((ext) => (
                       <span
                         key={ext}
-                        className="px-2.5 py-1 rounded-lg bg-white border border-slate-200 text-indigo-700 font-mono text-xs font-semibold shadow-2xs"
+                        className="px-2.5 py-1 rounded-lg bg-white border border-slate-200 text-indigo-700 font-mono text-xs font-semibold shadow-2xs select-text"
                       >
                         .{ext}
                       </span>
@@ -216,8 +216,8 @@ export const AppDetailsModal: React.FC<AppDetailsModalProps> = ({
                       key={idx}
                       className="p-3 rounded-xl bg-slate-50 border border-slate-200 space-y-1"
                     >
-                      <div className="font-bold text-slate-900 text-xs">{t.name || 'Tipo sem nome'}</div>
-                      <div className="flex flex-wrap gap-1 text-[11px] font-mono text-purple-700">
+                      <div className="font-bold text-slate-900 text-xs select-text">{t.name || 'Tipo sem nome'}</div>
+                      <div className="flex flex-wrap gap-1 text-[11px] font-mono text-purple-700 select-text">
                         {t.utis?.map((uti: string) => (
                           <span key={uti} className="px-2 py-0.5 rounded-md bg-purple-50 border border-purple-200 font-medium">
                             {uti}
