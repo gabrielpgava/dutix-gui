@@ -168,11 +168,11 @@ export const TargetsView: React.FC<TargetsViewProps> = ({
           {/* Targets Table */}
           <div className="lg:col-span-7 bg-white border border-slate-200/90 rounded-3xl overflow-hidden shadow-xs">
             <div className="max-h-[600px] overflow-y-auto">
-              <table className="w-full text-left text-xs text-slate-800">
+              <table className="w-full table-fixed text-left text-xs text-slate-800">
                 <thead className="bg-slate-50 text-[10px] uppercase tracking-wider text-slate-500 border-b border-slate-200 sticky top-0">
                   <tr>
-                    <th className="px-5 py-3 font-bold">Extensão</th>
-                    <th className="px-5 py-3 font-bold">UTI Resolvido</th>
+                    <th className="w-32 px-5 py-3 font-bold">Extensão</th>
+                    <th className="hidden px-5 py-3 font-bold xl:table-cell">UTI Resolvido</th>
                     <th className="px-5 py-3 font-bold">App Padrão</th>
                   </tr>
                 </thead>
@@ -187,10 +187,10 @@ export const TargetsView: React.FC<TargetsViewProps> = ({
                           isSelected ? 'bg-indigo-50/70 border-l-2 border-indigo-600' : ''
                         }`}
                       >
-                        <td className="px-5 py-3 font-mono font-bold text-indigo-700">
+                        <td className="w-32 truncate px-5 py-3 font-mono font-bold text-indigo-700">
                           .{t.extension}
                         </td>
-                        <td className="px-5 py-3 font-mono text-xs text-slate-500 truncate max-w-xs">
+                        <td className="hidden max-w-xs truncate px-5 py-3 font-mono text-xs text-slate-500 xl:table-cell">
                           {t.uti}
                         </td>
                         <td className="px-5 py-3 font-semibold text-slate-800 truncate max-w-xs">
