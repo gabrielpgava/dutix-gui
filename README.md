@@ -17,7 +17,7 @@
   <img src="https://img.shields.io/badge/Frontend-React%2018%20%7C%20TypeScript-61DAFB?style=flat-square&logo=react&logoColor=black" alt="React + TS" />
   <img src="https://img.shields.io/badge/Styling-TailwindCSS%20v4-38B2AC?style=flat-square&logo=tailwind-css&logoColor=white" alt="TailwindCSS" />
   <img src="https://img.shields.io/badge/Framework-Wails%20v2-DF1E54?style=flat-square" alt="Wails v2" />
-  <img src="https://img.shields.io/badge/License-MIT-green?style=flat-square" alt="License: MIT" />
+  <img src="https://img.shields.io/badge/License-PolyForm%20Shield%201.0.0-blue?style=flat-square" alt="License: PolyForm Shield 1.0.0" />
 </p>
 
 ---
@@ -25,7 +25,7 @@
 <a name="english"></a>
 ## 🇬🇧 English
 
-**Dutix GUI** is a native, modern, and open-source desktop application for macOS built with **Wails v2** (Go backend + React 18, TypeScript, TailwindCSS v4, and Lucide Icons). It acts as a comprehensive, visual wrapper around the high-performance CLI utility [`dutix`](https://github.com/jackchuka/dutix), managing macOS LaunchServices associations (`LSSetDefaultHandlerForURLScheme` and `LSSetDefaultRoleHandlerForContentType`) with safety snapshots, visual app migration, dotfiles preset management, and zero modifications to the original CLI core.
+**Dutix GUI** is a native, modern, and source-available desktop application for macOS built with **Wails v2** (Go backend + React 18, TypeScript, TailwindCSS v4, and Lucide Icons). It acts as a comprehensive, visual wrapper around the high-performance CLI utility [`dutix`](https://github.com/jackchuka/dutix), managing macOS LaunchServices associations (`LSSetDefaultHandlerForURLScheme` and `LSSetDefaultRoleHandlerForContentType`) with safety snapshots, visual app migration, dotfiles preset management, and zero modifications to the original CLI core.
 
 ---
 
@@ -194,7 +194,7 @@ We are deeply grateful to jackchuka for developing and maintaining the foundatio
 
 ### 📄 License
 
-Distributed under the **MIT License**. See `LICENSE` for more information.
+The original Dutix GUI code is offered under the **PolyForm Shield License 1.0.0** (source-available). See [LICENSE](LICENSE), [NOTICE](NOTICE), and [LICENSING.md](LICENSING.md). The third-party CLI remains MIT-licensed; see [THIRD_PARTY_NOTICES.md](THIRD_PARTY_NOTICES.md). Previous MIT-licensed releases retain their original rights.
 
 ---
 ---
@@ -202,7 +202,7 @@ Distributed under the **MIT License**. See `LICENSE` for more information.
 <a name="português"></a>
 ## 🇧🇷 Português
 
-O **Dutix GUI** é um aplicativo desktop nativo, moderno e de código aberto (open-source) para macOS desenvolvido em **Wails v2** (Go no backend + React 18, TypeScript, TailwindCSS v4 e Lucide Icons no frontend). Ele funciona como uma interface gráfica completa para o utilitário CLI [`dutix`](https://github.com/jackchuka/dutix), gerenciando associações de arquivos e esquemas de URL do LaunchServices no macOS (`LSSetDefaultHandlerForURLScheme` e `LSSetDefaultRoleHandlerForContentType`) com snapshots de segurança, migração visual de apps, gerenciador de presets para dotfiles e sem alterar o código original do utilitário.
+O **Dutix GUI** é um aplicativo desktop nativo, moderno e com código-fonte disponível (source-available) para macOS desenvolvido em **Wails v2** (Go no backend + React 18, TypeScript, TailwindCSS v4 e Lucide Icons no frontend). Ele funciona como uma interface gráfica completa para o utilitário CLI [`dutix`](https://github.com/jackchuka/dutix), gerenciando associações de arquivos e esquemas de URL do LaunchServices no macOS (`LSSetDefaultHandlerForURLScheme` e `LSSetDefaultRoleHandlerForContentType`) com snapshots de segurança, migração visual de apps, gerenciador de presets para dotfiles e sem alterar o código original do utilitário.
 
 ---
 
@@ -371,5 +371,5 @@ Expressamos nossos sinceros agradecimentos ao jackchuka pelo desenvolvimento e m
 
 ### 📄 Licença
 
-Distribuído sob a licença **MIT**. Consulte o arquivo `LICENSE` para mais detalhes.
+O código original do Dutix GUI está disponibilizado sob a **PolyForm Shield License 1.0.0** (source-available). Veja [LICENSE](LICENSE), [NOTICE](NOTICE) e [LICENSING.md](LICENSING.md). O utilitário de terceiros permanece sob MIT; consulte [THIRD_PARTY_NOTICES.md](THIRD_PARTY_NOTICES.md). Versões já lançadas sob MIT preservam as permissões anteriores.
 
